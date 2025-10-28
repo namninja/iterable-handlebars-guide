@@ -269,6 +269,208 @@
           "solution": "Use with triggered campaigns/journeys only"
         }
       ]
+    },
+    "api_datafields_syntax_confusion": {
+      "issue": "API dataFields not rendering in template",
+      "critical_distinction": "/campaigns/trigger uses {{}} | /campaigns/create uses [[]]",
+      "common_problems": [
+        {
+          "problem": "Create API dataFields not showing (using wrong syntax)",
+          "api_used": "/api/campaigns/create",
+          "wrong_template": "<h1>{{saleName}}</h1>\n<p>{{discountPercent}}% off</p>",
+          "why_wrong": "Create API requires [[double brackets]] for dataFields",
+          "correct_template": "<h1>[[saleName]]</h1>\n<p>[[discountPercent]]% off</p>",
+          "rule": "Create API = [[brackets]] | Trigger API = {{braces}}"
+        },
+        {
+          "problem": "Trigger API dataFields not showing (using wrong syntax)",
+          "api_used": "/api/campaigns/trigger",
+          "wrong_template": "<p>Order #[[orderId]]</p>\n<p>Total: [[orderTotal]]</p>",
+          "why_wrong": "Trigger API uses standard Handlebars {{curly braces}}",
+          "correct_template": "<p>Order #{{orderId}}</p>\n<p>Total: {{numberFormat orderTotal \"currency\" locale}}</p>",
+          "rule": "Trigger API = {{braces}} | Create API = [[brackets]]"
+        },
+        {
+          "problem": "Create API dataFields don't work in SMS campaign",
+          "api_request": {
+            "endpoint": "/api/campaigns/create",
+            "campaignType": "SMS",
+            "dataFields": {
+              "promoCode": "SAVE25"
+            }
+          },
+          "template": "Use code [[promoCode]] for 25% off",
+          "why_not_working": "Create API dataFields ONLY work for EMAIL campaigns",
+          "supported_channels": ["Email ONLY"],
+          "not_supported": ["SMS", "Push", "In-App", "WhatsApp"],
+          "solution": "Use Trigger API for SMS with per-recipient data, or use user profile fields"
+        },
+        {
+          "problem": "Mixing both syntaxes incorrectly",
+          "scenario": "Using Create API but mixing syntaxes",
+          "wrong": "<h1>{{saleName}}</h1>\n<p>Hi [[firstName]]</p>",
+          "correct": "<h1>[[saleName]]</h1>\n<p>Hi {{firstName}}</p>",
+          "explanation": "Campaign data ([[brackets]]) | User profile data ({{braces}})"
+        }
+      ],
+      "syntax_quick_reference": {
+        "trigger_api": {
+          "endpoint": "/api/campaigns/trigger",
+          "dataFields_syntax": "{{fieldName}}",
+          "data_type": "Event data (per-recipient)",
+          "channels": "All channels",
+          "priority": "Highest (overrides user profile)",
+          "example": "{{orderId}}, {{total}}, {{trackingUrl}}"
+        },
+        "create_api": {
+          "endpoint": "/api/campaigns/create",
+          "dataFields_syntax": "[[fieldName]]",
+          "data_type": "Data feed (campaign-wide)",
+          "channels": "Email ONLY",
+          "priority": "N/A (different namespace)",
+          "example": "[[saleName]], [[discount]], [[promoCode]]"
+        },
+        "user_profile": {
+          "syntax": "{{fieldName}}",
+          "data_type": "User profile data",
+          "channels": "All channels",
+          "priority": "Medium",
+          "example": "{{firstName}}, {{email}}, {{loyaltyTier}}"
+        }
+      },
+      "decision_tree": {
+        "question_1": "Which API are you using?",
+        "if_trigger": {
+          "use_syntax": "{{fieldName}}",
+          "works_in": "All channels",
+          "data_scope": "Per-recipient",
+          "example": "POST /api/campaigns/trigger with {\"orderId\": \"123\"} → Template uses {{orderId}}"
+        },
+        "if_create": {
+          "use_syntax": "[[fieldName]]",
+          "works_in": "Email campaigns ONLY",
+          "data_scope": "Campaign-wide (same for all recipients)",
+          "example": "POST /api/campaigns/create with {\"saleName\": \"Flash Sale\"} → Template uses [[saleName]]"
+        }
+      },
+      "debugging_steps": [
+        "Check which API endpoint you're using (trigger vs create)",
+        "If using /campaigns/create, verify it's an EMAIL campaign (not SMS/Push)",
+        "If using /campaigns/create, use [[brackets]] not {{braces}}",
+        "If using /campaigns/trigger, use {{braces}} not [[brackets]]",
+        "Verify dataFields JSON is properly formatted in API request",
+        "Test with simple field first: [[test]] or {{test}}",
+        "Check API response for errors"
+      ],
+      "real_world_examples": {
+        "ecommerce_company": {
+          "transactional_emails": {
+            "api": "/api/campaigns/trigger",
+            "use_case": "Order confirmations",
+            "dataFields": {"orderId": "ORD-789", "total": 99.99},
+            "template_syntax": "Order #{{orderId}} Total: {{numberFormat total \"currency\" locale}}"
+          },
+          "marketing_blasts": {
+            "api": "/api/campaigns/create",
+            "use_case": "Weekend sale",
+            "dataFields": {"saleName": "Weekend Blowout", "discount": 30},
+            "template_syntax": "[[saleName]] - [[discount]]% OFF!"
+          }
+        }
+      }
+    },
+    "hosted_unsubscribe_url_issues": {
+      "issue": "Hosted unsubscribe URL not rendering correctly or showing wrong values",
+      "location": "Project Settings → Subscription Settings → Hosted Unsubscribe URL",
+      "critical_limitation": "ONLY uses User profile data - NOT event data, NOT template {{assign}} variables",
+      "common_problems": [
+        {
+          "problem": "Variable not rendering in hosted unsubscribe URL",
+          "wrong_approach": "Trying to use {{assign}} in template to set variable",
+          "wrong_code": "{{!-- In template --}}\n{{assign \"publication\" \"myBrand\"}}\n{{hostedUnsubscribeUrl}}",
+          "why_it_fails": "Hosted unsubscribe URL is evaluated at project level before template execution",
+          "correct_solution": "Store 'publication' field in User profile",
+          "workflow": [
+            "Update User profile with field: publication = \"myBrand\"",
+            "Set hosted unsubscribe URL in Project Settings: https://{{publication}}.example.com/preferences",
+            "Use {{hostedUnsubscribeUrl}} in template - it will render using User profile data"
+          ]
+        },
+        {
+          "problem": "Broken URL with missing subdomain",
+          "example_url": "https://.example.com/preferences",
+          "wrong_code": "https://{{publication}}.example.com/preferences",
+          "cause": "User profile field 'publication' is null/missing and no default provided",
+          "correct_solution": "Always use {{#if}}/{{else}} with defaults",
+          "correct_code": "https://{{#if publication}}{{publication}}{{else}}www{{/if}}.example.com/preferences",
+          "result": "If publication is null, renders as: https://www.example.com/preferences"
+        },
+        {
+          "problem": "Expected event data not showing",
+          "scenario": "User expects {{productId}} from purchase event to appear in unsubscribe URL",
+          "why_it_fails": "Hosted unsubscribe URL cannot access event data",
+          "explanation": "Event data is campaign-specific, but hosted unsubscribe URL is project-level and must work across all campaigns",
+          "solution": "Store relevant data in User profile if needed in hosted unsubscribe URL"
+        },
+        {
+          "problem": "Different URLs in different campaigns",
+          "scenario": "Want brand-specific unsubscribe URLs based on which campaign was sent",
+          "issue": "Cannot pass campaign-specific data to hosted unsubscribe URL",
+          "workaround_1": "Update User profile with 'preferredBrand' field and use that",
+          "workaround_2": "Use custom unsubscribe URL in template instead of {{hostedUnsubscribeUrl}}",
+          "note": "Custom URLs require managing unsubscribe logic yourself"
+        }
+      ],
+      "best_practices": [
+        {
+          "rule": "Always use defaults",
+          "pattern": "{{#if field}}{{field}}{{else}}default{{/if}}",
+          "example": "https://{{#if region}}{{region}}{{else}}us{{/if}}.example.com/prefs"
+        },
+        {
+          "rule": "Store data in User profile",
+          "fields_to_consider": [
+            "publication - for multi-brand organizations",
+            "region - for geographic routing",
+            "brandId - for brand-specific preferences",
+            "preferredLanguage - for localized preference pages"
+          ]
+        },
+        {
+          "rule": "Test with incomplete profiles",
+          "test_cases": [
+            "New user with minimal profile data",
+            "User with null values for dynamic fields",
+            "User with unexpected/invalid values"
+          ]
+        },
+        {
+          "rule": "URL encode user data",
+          "example": "https://example.com/prefs?email={{urlEncode email}}&id={{urlEncode userId}}"
+        }
+      ],
+      "real_world_example": {
+        "scenario": "Multi-publication news organization",
+        "requirement": "Each user unsubscribes via their publication's subdomain",
+        "setup": {
+          "user_profile_field": "publication",
+          "example_values": ["sports", "news", "business"],
+          "hosted_unsubscribe_url": "https://{{#if publication}}{{publication}}{{else}}www{{/if}}.reiterablecoffee.com/preferences"
+        },
+        "results": {
+          "user_with_publication_sports": "https://sports.reiterablecoffee.com/preferences",
+          "user_with_publication_news": "https://news.reiterablecoffee.com/preferences",
+          "user_with_null_publication": "https://www.reiterablecoffee.com/preferences"
+        },
+        "critical_note": "The 'publication' field MUST be in User profile. Cannot be set via {{assign}} in templates."
+      },
+      "debugging_steps": [
+        "Verify field exists in User profile (not just in template or event)",
+        "Check field spelling matches exactly (case-sensitive)",
+        "Test URL with users who have null/missing fields",
+        "Confirm {{#if}}/{{else}} default is provided",
+        "Check that hosted unsubscribe URL is saved in Project Settings"
+      ]
     }
   },
   "security_concerns": {

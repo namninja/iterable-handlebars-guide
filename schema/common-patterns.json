@@ -158,7 +158,107 @@
       "use_case": "Consistent subject line prefix across templates"
     }
   },
+  "api_triggered_content": {
+    "trigger_api_order_confirmation": {
+      "name": "Trigger API - Order Confirmation Email",
+      "api_endpoint": "/api/campaigns/trigger",
+      "syntax": "{{fieldName}} - Curly braces for event data",
+      "api_request": {
+        "campaignId": 12345,
+        "recipientEmail": "customer@example.com",
+        "dataFields": {
+          "orderId": "ORD-2024-789",
+          "orderTotal": 99.99,
+          "orderDate": "2024-01-15",
+          "items": [
+            {"name": "Product A", "price": 29.99, "qty": 2},
+            {"name": "Product B", "price": 39.99, "qty": 1}
+          ],
+          "trackingUrl": "https://example.com/track/ABC123"
+        }
+      },
+      "template": "<!DOCTYPE html>\n<html>\n<body>\n  <h1>Order Confirmation</h1>\n  \n  <!-- User profile data: {{}} -->\n  <p>Hi {{firstName}},</p>\n  \n  <!-- Event data from API: {{}} -->\n  <p>Order #{{orderId}}</p>\n  <p>Date: {{dateFormat orderDate \"MMMM d, yyyy\"}}</p>\n  \n  <h2>Items:</h2>\n  {{#each items}}\n    <div class=\"item\">\n      <span>{{this.name}}</span>\n      <span>Qty: {{this.qty}}</span>\n      <span>{{numberFormat this.price \"currency\" locale}}</span>\n    </div>\n  {{/each}}\n  \n  <p><strong>Total: {{numberFormat orderTotal \"currency\" locale}}</strong></p>\n  \n  <p><a href=\"{{trackingUrl}}\">Track Your Order</a></p>\n</body>\n</html>",
+      "use_case": "Transactional order confirmation with per-order data"
+    },
+    "create_api_marketing_blast": {
+      "name": "Create API - Marketing Sale Email",
+      "api_endpoint": "/api/campaigns/create",
+      "syntax": "[[fieldName]] - Double square brackets for campaign data",
+      "critical_note": "EMAIL CAMPAIGNS ONLY - does not work for SMS/Push/In-App",
+      "api_request": {
+        "name": "Spring Sale 2024",
+        "templateId": 67890,
+        "listIds": [1000, 2000],
+        "dataFields": {
+          "saleName": "Spring Clearance",
+          "discountPercent": 30,
+          "saleEndDate": "2024-03-31",
+          "promoCode": "SPRING30",
+          "heroImageUrl": "https://example.com/spring-hero.jpg"
+        }
+      },
+      "template": "<!DOCTYPE html>\n<html>\n<body>\n  <!-- Campaign data: [[]] -->\n  <h1>[[saleName]]</h1>\n  <img src=\"[[heroImageUrl]]\" alt=\"[[saleName]]\">\n  \n  <!-- User profile: {{}} -->\n  <p>Hi {{firstName}},</p>\n  \n  <!-- Mix both -->\n  <p>Save [[discountPercent]]% on all {{preferredCategory}} items!</p>\n  \n  <!-- Use Handlebars helpers with [[]] -->\n  <p>Sale ends: {{dateFormat [[saleEndDate]] \"MMMM d, yyyy\"}}</p>\n  \n  {{#ifGt [[discountPercent]] 25}}\n    <div class=\"big-sale-badge\">HUGE SALE!</div>\n  {{/ifGt}}\n  \n  <p>Use code: <strong>[[promoCode]]</strong></p>\n  \n  <a href=\"https://example.com/shop?promo=[[promoCode]]&user={{userId}}\">Shop Now</a>\n</body>\n</html>",
+      "use_case": "Marketing blast with campaign-wide sale information"
+    },
+    "api_syntax_comparison": {
+      "name": "Side-by-Side Syntax Comparison",
+      "trigger_api_syntax": {
+        "api": "/api/campaigns/trigger",
+        "template_syntax": "{{fieldName}}",
+        "example": "Order #{{orderId}} Total: {{orderTotal}}",
+        "data_scope": "Per-recipient (each user gets unique data)",
+        "channels": "All (Email, SMS, Push, In-App, WhatsApp)"
+      },
+      "create_api_syntax": {
+        "api": "/api/campaigns/create",
+        "template_syntax": "[[fieldName]]",
+        "example": "Sale: [[saleName]] - [[discount]]% OFF",
+        "data_scope": "Campaign-wide (all users see same data)",
+        "channels": "Email ONLY"
+      },
+      "user_profile_syntax": {
+        "source": "User profile",
+        "template_syntax": "{{fieldName}}",
+        "example": "Hi {{firstName}}, tier: {{loyaltyTier}}",
+        "data_scope": "Per-user (from user record)",
+        "channels": "All channels"
+      }
+    }
+  },
   "urls_and_links": {
+    "hosted_unsubscribe_dynamic_subdomain": {
+      "name": "Hosted Unsubscribe URL with Dynamic Subdomain",
+      "location": "Project Settings → Subscription Settings → Hosted Unsubscribe URL",
+      "code": "https://{{#if publication}}{{publication}}{{else}}www{{/if}}.reiterablecoffee.com/preferences",
+      "use_case": "Multi-brand organization with brand-specific preference pages",
+      "critical_note": "ONLY uses User profile data - NOT event data or template {{assign}} variables",
+      "requirements": [
+        "User profile must have 'publication' field",
+        "MUST include {{else}} default to prevent broken URLs",
+        "Cannot use {{assign}} in templates to set this value"
+      ],
+      "examples": {
+        "user_with_publication_sports": "https://sports.reiterablecoffee.com/preferences",
+        "user_with_publication_news": "https://news.reiterablecoffee.com/preferences",
+        "user_with_null_publication": "https://www.reiterablecoffee.com/preferences"
+      },
+      "variants": [
+        {
+          "description": "Region-based routing",
+          "code": "https://{{#if region}}{{region}}{{else}}us{{/if}}.example.com/preferences?email={{urlEncode email}}"
+        },
+        {
+          "description": "Brand with path parameter",
+          "code": "https://preferences.example.com/{{#if brandId}}{{brandId}}{{else}}default{{/if}}?user={{urlEncode userId}}"
+        },
+        {
+          "description": "With language preference",
+          "code": "https://example.com/{{#if preferredLanguage}}{{preferredLanguage}}{{else}}en{{/if}}/preferences?email={{urlEncode email}}"
+        }
+      ],
+      "template_usage": "{{hostedUnsubscribeUrl}}",
+      "best_practice": "Always test with users who have null/missing profile fields to ensure default renders correctly"
+    },
     "secure_profile_link": {
       "name": "Secure Profile Link with HMAC",
       "code": "<a href=\"https://example.com/profile?id={{hmacSHA256 userId}}\">View Your Profile</a>",

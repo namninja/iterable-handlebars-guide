@@ -482,21 +482,322 @@
       ]
     }
   },
-  "project_settings": {
-    "hosted_unsubscribe_url": {
-      "name": "Hosted Unsubscribe URL",
+  "api_endpoints": {
+    "campaigns_trigger_api": {
+      "name": "Campaign Trigger API (/api/campaigns/trigger)",
       "handlebars_supported": true,
-      "description": "Dynamic hosted unsubscribe URLs with user information",
-      "location": "Project Settings → Subscription Settings → Hosted Unsubscribe URL",
-      "examples": [
+      "data_syntax": "{{fieldName}} - Curly braces (Handlebars syntax)",
+      "data_source": "Event data (per-recipient)",
+      "description": "Trigger existing campaigns with per-recipient transactional data",
+      "endpoint": "POST /api/campaigns/trigger",
+      "use_cases": [
+        "Order confirmations",
+        "Password resets",
+        "Shipping notifications",
+        "Transaction receipts",
+        "Account alerts",
+        "Any user-specific transactional event"
+      ],
+      "api_structure": {
+        "campaignId": "Required - ID of campaign to trigger",
+        "recipientEmail": "Email address of recipient (or recipientUserId)",
+        "dataFields": "JSON object - becomes event data in template"
+      },
+      "example_request": {
+        "method": "POST",
+        "endpoint": "/api/campaigns/trigger",
+        "body": {
+          "campaignId": 12345,
+          "recipientEmail": "user@example.com",
+          "dataFields": {
+            "orderId": "ORD-789",
+            "orderTotal": 99.99,
+            "productName": "Wireless Headphones",
+            "quantity": 2,
+            "trackingUrl": "https://example.com/track/ABC123"
+          }
+        }
+      },
+      "template_access": {
+        "syntax": "{{fieldName}} - Standard Handlebars curly braces",
+        "examples": [
+          {
+            "description": "Direct field access",
+            "code": "<p>Order #{{orderId}}</p>\n<p>Total: {{numberFormat orderTotal \"currency\" locale}}</p>\n<p>Item: {{productName}} (Qty: {{quantity}})</p>"
+          },
+          {
+            "description": "Subject line",
+            "code": "Subject: Order #{{orderId}} Confirmed"
+          },
+          {
+            "description": "With user profile data",
+            "code": "<p>Hi {{firstName}},</p>\n<p>Your order #{{orderId}} for {{numberFormat orderTotal \"currency\" locale}} is confirmed.</p>"
+          },
+          {
+            "description": "In catalog lookups",
+            "code": "{{#catalog \"products\" productId as |product|}}\n  <h3>{{product.name}}</h3>\n{{/catalog}}"
+          },
+          {
+            "description": "In conditionals",
+            "code": "{{#ifGt orderTotal 100}}\n  Free shipping on orders over $100!\n{{/ifGt}}"
+          }
+        ]
+      },
+      "data_priority": {
+        "order": [
+          "1. API dataFields (highest priority)",
+          "2. User profile data",
+          "3. Data feed data (lowest priority)"
+        ],
+        "example": "If API has \"firstName\": \"John\" and profile has \"firstName\": \"Jane\", {{firstName}} displays \"John\""
+      },
+      "supported_channels": [
+        "Email",
+        "SMS",
+        "Push",
+        "In-App",
+        "WhatsApp",
+        "All message types"
+      ],
+      "key_features": [
+        "Per-recipient unique data",
+        "Overrides user profile fields with same name",
+        "Available in all template contexts (subject, body, snippets)",
+        "Works with all Handlebars helpers",
+        "Supports nested objects and arrays"
+      ],
+      "important_notes": [
+        "One API call = one recipient",
+        "Best for transactional messages",
+        "Data is ephemeral (not stored in user profile)",
+        "Field names are case-sensitive"
+      ]
+    },
+    "campaigns_create_api": {
+      "name": "Campaign Create API (/api/campaigns/create)",
+      "handlebars_supported": true,
+      "data_syntax": "[[fieldName]] - Double square brackets (Data feed syntax)",
+      "data_source": "Campaign-level data feed (same for all recipients)",
+      "description": "Create new campaigns from templates with campaign-wide data",
+      "endpoint": "POST /api/campaigns/create",
+      "critical_limitation": "Email campaigns ONLY - dataFields not supported for SMS, Push, In-App, or WhatsApp",
+      "use_cases": [
+        "Marketing blasts with campaign-specific data",
+        "Newsletters with monthly/weekly themes",
+        "Sale announcements with promotion details",
+        "Event invitations with event-specific info",
+        "Product launches with product data"
+      ],
+      "api_structure": {
+        "name": "Campaign name",
+        "templateId": "ID of template to use",
+        "listIds": "Array of list IDs to send to",
+        "dataFields": "JSON object - becomes data feed data (EMAIL ONLY)"
+      },
+      "example_request": {
+        "method": "POST",
+        "endpoint": "/api/campaigns/create",
+        "body": {
+          "name": "Spring Sale 2024",
+          "templateId": 123456,
+          "listIds": [789, 012],
+          "dataFields": {
+            "saleName": "Spring Clearance",
+            "discountPercent": 25,
+            "saleEndDate": "2024-03-31",
+            "promoCode": "SPRING25",
+            "featuredCategory": "Electronics"
+          }
+        }
+      },
+      "template_access": {
+        "syntax": "[[fieldName]] - MUST use double square brackets (data feed syntax)",
+        "wrong_syntax": "{{fieldName}} - This will NOT work for campaign dataFields",
+        "examples": [
+          {
+            "description": "Correct: Double square brackets",
+            "code": "<h1>[[saleName]] - [[discountPercent]]% Off!</h1>\n<p>Use code: [[promoCode]]</p>\n<p>Sale ends: [[saleEndDate]]</p>"
+          },
+          {
+            "description": "Wrong: Curly braces (won't work)",
+            "code": "<!-- WRONG - This will not render -->\n<h1>{{saleName}}</h1>"
+          },
+          {
+            "description": "Mixing campaign data with user profile",
+            "code": "<!-- Campaign data: [[double brackets]] -->\n<h1>[[saleName]]</h1>\n\n<!-- User profile: {{curly braces}} -->\n<p>Hi {{firstName}},</p>\n\n<!-- Mix both -->\n<p>Save [[discountPercent]]% in your favorite category: {{preferredCategory}}</p>"
+          },
+          {
+            "description": "Using Handlebars helpers with data feed syntax",
+            "code": "<!-- You CAN use Handlebars helpers -->\n<p>Sale ends: {{dateFormat [[saleEndDate]] \"MMMM d, yyyy\"}}</p>\n<p>Save: {{numberFormat [[discountPercent]] \"decimal\"}}%</p>\n\n{{#ifGt [[discountPercent]] 20}}\n  <div class=\"big-sale\">Huge Savings!</div>\n{{/ifGt}}"
+          }
+        ]
+      },
+      "data_scope": {
+        "campaign_level": "All recipients in listIds see the SAME [[field]] values",
+        "user_level": "Each recipient sees their own {{field}} values from user profile",
+        "example": "All 10,000 recipients see [[saleName]] as \"Spring Sale\", but each sees their own {{firstName}}"
+      },
+      "supported_channels": [
+        "Email ONLY"
+      ],
+      "not_supported": [
+        "SMS campaigns",
+        "Push campaigns",
+        "In-App campaigns",
+        "WhatsApp campaigns"
+      ],
+      "key_features": [
+        "Campaign-wide data (same for all recipients)",
+        "Use data feed syntax [[field]]",
+        "Email campaigns only",
+        "Can use Handlebars helpers with [[syntax]]",
+        "Combine with user profile data {{syntax}}"
+      ],
+      "important_notes": [
+        "MUST use [[double brackets]] for dataFields",
+        "Email campaigns only - not SMS/Push/In-App",
+        "One API call = one campaign to multiple recipients",
+        "Best for marketing blasts with campaign-specific data",
+        "Data is campaign-scoped, not user-scoped"
+      ],
+      "common_errors": [
         {
-          "code": "https://example.com/preferences?email={{urlEncode email}}&userId={{urlEncode userId}}&listIds={{join emailListIds \",\"}}"
+          "error": "Using {{curly}} instead of [[square]]",
+          "wrong": "{{saleName}}",
+          "correct": "[[saleName]]",
+          "result": "Field won't render if using wrong syntax"
         },
         {
-          "code": "https://example.com/unsubscribe?email={{urlEncode email}}&campaignId={{campaignId}}&timestamp={{now format=\"yyyy-MM-dd\"}}"
+          "error": "Trying to use in SMS campaign",
+          "issue": "dataFields only work for email campaigns",
+          "solution": "Use standard data feed or user profile fields for non-email"
+        }
+      ]
+    },
+    "api_comparison": {
+      "name": "Trigger API vs. Create API - Quick Reference",
+      "comparison_table": {
+        "data_syntax": {
+          "trigger": "{{fieldName}} - Curly braces",
+          "create": "[[fieldName]] - Double square brackets"
+        },
+        "data_source": {
+          "trigger": "Event data (per-recipient)",
+          "create": "Data feed data (campaign-wide)"
+        },
+        "scope": {
+          "trigger": "Per-recipient (unique per user)",
+          "create": "Campaign-wide (same for all)"
+        },
+        "recipients": {
+          "trigger": "Single recipient per API call",
+          "create": "Multiple recipients (listIds)"
+        },
+        "use_case": {
+          "trigger": "Transactional (order confirmations, receipts)",
+          "create": "Marketing blasts (sales, newsletters)"
+        },
+        "channels": {
+          "trigger": "All channels (Email, SMS, Push, In-App, WhatsApp)",
+          "create": "Email ONLY"
+        },
+        "priority": {
+          "trigger": "Highest (overrides user profile)",
+          "create": "N/A (different syntax, no conflict)"
+        }
+      },
+      "when_to_use_which": {
+        "use_trigger_for": [
+          "Order confirmations with order-specific data",
+          "Password resets with unique tokens",
+          "Shipping notifications with tracking numbers",
+          "Transaction receipts",
+          "User-specific transactional events"
+        ],
+        "use_create_for": [
+          "Marketing campaigns with sale/promotion data",
+          "Newsletters with monthly themes",
+          "Product launch announcements",
+          "Event invitations with event details",
+          "Blast campaigns with campaign-specific content"
+        ]
+      },
+      "can_use_both": {
+        "scenario": "E-commerce company",
+        "trigger_usage": "Order confirmations ({{orderId}}, {{total}})",
+        "create_usage": "Weekly sale blasts ([[saleName]], [[discount]])",
+        "note": "Both APIs serve different purposes and use different syntax"
+      }
+    }
+  },
+  "project_settings": {
+    "hosted_unsubscribe_url": {
+      "name": "Hosted Unsubscribe URL (Project Settings)",
+      "handlebars_supported": true,
+      "data_source": "User profile ONLY",
+      "description": "Dynamic hosted unsubscribe URLs with user information from Project Settings",
+      "location": "Project Settings → Subscription Settings → Hosted Unsubscribe URL",
+      "critical_limitations": {
+        "user_profile_only": "Handlebars variables ONLY pull from User profile - NOT from event data, NOT from template {{assign}} statements",
+        "no_template_assignments": "Cannot use {{assign}} in templates to create variables for hosted unsubscribe URL",
+        "must_use_defaults": "MUST use {{#if}}/{{else}} with default values to prevent rendering issues if field is missing",
+        "pre_template_execution": "Hosted unsubscribe URL is generated before template execution, so template-level variables are not available"
+      },
+      "best_practices": [
+        "Always include default values in {{else}} blocks",
+        "Store necessary data in User profile fields (e.g., 'publication', 'brandDomain', 'region')",
+        "Use {{#if field}}{{field}}{{else}}default{{/if}} pattern for dynamic domains",
+        "Test with users who have missing/null profile fields",
+        "Use urlEncode for any user-provided data in query parameters"
+      ],
+      "examples": [
+        {
+          "use_case": "Dynamic subdomain based on user profile",
+          "code": "https://{{#if publication}}{{publication}}{{else}}www.reiterablecoffee{{/if}}.com/preferences",
+          "description": "Uses 'publication' field from User profile to set subdomain, falls back to default",
+          "note": "The 'publication' field MUST exist in User profile - cannot be set in template"
+        },
+        {
+          "use_case": "Query parameters with user data",
+          "code": "https://example.com/preferences?email={{urlEncode email}}&userId={{urlEncode userId}}&listIds={{join emailListIds \",\"}}",
+          "description": "Standard query parameter approach with URL encoding"
+        },
+        {
+          "use_case": "Dynamic domain with region",
+          "code": "https://{{#if region}}{{region}}{{else}}us{{/if}}.example.com/unsubscribe?email={{urlEncode email}}",
+          "description": "Region-based subdomain from User profile with 'us' as default"
+        },
+        {
+          "use_case": "Brand-specific preferences page",
+          "code": "https://preferences.example.com/{{#if brandId}}{{brandId}}{{else}}default{{/if}}?user={{urlEncode userId}}",
+          "description": "Brand-specific path from User profile field"
         }
       ],
-      "use_in_templates": "{{hostedUnsubscribeUrl}}"
+      "common_errors": [
+        {
+          "error": "Missing subdomain or broken URL",
+          "cause": "User profile field is null/missing and no {{else}} default provided",
+          "fix": "Always use {{#if field}}{{field}}{{else}}default{{/if}} pattern"
+        },
+        {
+          "error": "Variable not rendering",
+          "cause": "Trying to use {{assign}} from template or event data",
+          "fix": "Store the value in User profile field instead"
+        },
+        {
+          "error": "Different values in different emails",
+          "cause": "Expecting event data to populate variable",
+          "fix": "Hosted unsubscribe URL only uses User profile data, not event data"
+        }
+      ],
+      "use_in_templates": "{{hostedUnsubscribeUrl}}",
+      "workflow": {
+        "step_1": "Set Hosted Unsubscribe URL in Project Settings with Handlebars",
+        "step_2": "Ensure User profile has necessary fields (e.g., 'publication', 'region', 'brandId')",
+        "step_3": "Use {{hostedUnsubscribeUrl}} in email templates",
+        "step_4": "URL is generated using current User profile data when email is sent"
+      },
+      "why_user_profile_only": "The hosted unsubscribe URL is configured at the project level and is evaluated in the context of the user record, not within any specific campaign or message template. This is why it can only access User profile fields."
     }
   },
   "template_previews": {
