@@ -1,5 +1,81 @@
 # Changelog
 
+## 2025-10-28 - README Updated with Comprehensive Usage Options
+
+### Major README Expansion
+
+**Added 6 different usage methods** with detailed comparisons and setup instructions.
+
+#### New Usage Options:
+
+1. **Filesystem MCP** (⭐⭐ Recommended for local development)
+   - Fastest access method
+   - Works offline
+   - Real-time updates without git push
+   - Complete setup guide for Cursor and Claude Desktop
+
+2. **GitHub MCP** (⭐ For teams and version control)
+   - Repositioned as team/version control solution
+   - Maintained existing setup instructions
+
+3. **Claude Projects / Custom GPTs** (⭐⭐⭐ For team sharing)
+   - NEW: Complete guide for creating Claude Projects
+   - Step-by-step instructions with file recommendations
+   - Custom instructions template included
+   - ChatGPT Custom GPT alternative documented
+
+4. **Individual JSON Upload** (For one-off questions)
+   - Enhanced decision table for file selection
+   - File size information added
+
+5. **Original Markdown File** (For manual reading)
+   - Clear warnings about token limits for AI agents
+   - Explicit "not recommended for AI uploads" notice
+
+6. **Workspace Access** (Cursor/VS Code)
+   - NEW: Documentation for built-in workspace access
+   - Zero-setup option for Cursor users
+
+#### New Comprehensive Comparison Tables:
+
+**By Technical Approach:**
+- Comparison across 6 methods
+- Speed, token usage, offline capability, sharing ability
+
+**By Use Case:**
+- 9 different user scenarios
+- Specific recommendations for each
+
+**By Priority:**
+- 7 priority categories (speed, sharing, cost, etc.)
+- Best method for each priority
+
+#### New Workflow Guides:
+
+- 🏆 Solo Developers - Filesystem MCP recommended
+- 👥 Small Teams (2-10) - Claude Projects
+- 🏢 Large Teams/Enterprises - Hybrid approach
+- 🤝 Clients/Customers - Claude Projects
+- 🔧 Active Development - Local Filesystem MCP
+- ❓ One-Off Questions - JSON Upload
+
+#### Statistics:
+
+- **Before:** 449 lines
+- **After:** 731 lines
+- **Added:** 282 lines (+63%)
+
+#### Key Improvements:
+
+- ✅ Filesystem MCP now primary recommendation for solo developers
+- ✅ Claude Projects highlighted as best for non-technical teams
+- ✅ GitHub MCP repositioned as team/version control tool
+- ✅ Complete setup guides with platform-specific paths
+- ✅ Honest assessment of trade-offs for each method
+- ✅ Decision support for choosing the right approach
+
+---
+
 ## 2025-10-28 - Logic Snippets Pattern Added
 
 ### New Section: `logic_snippets` in `schema/common-patterns.json`
