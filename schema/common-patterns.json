@@ -1,0 +1,354 @@
+{
+  "personalization": {
+    "greeting_with_fallback": {
+      "name": "Personalized Greeting with Fallback",
+      "use_case": "Greet user by name, with fallback for missing names",
+      "code": "Hi {{defaultIfEmpty firstName \"there\"}}!",
+      "variants": [
+        {
+          "description": "Full name or fallback",
+          "code": "Hello {{#if firstName}}{{firstName}} {{lastName}}{{else}}Valued Customer{{/if}}!"
+        },
+        {
+          "description": "Using or logic",
+          "code": "Hi {{#or firstName email}}{{this}}{{else}}there{{/or}}!"
+        }
+      ]
+    },
+    "smart_name_display": {
+      "name": "Smart Name with Multiple Fallbacks",
+      "code": "{{#if firstName}}{{firstName}}{{else}}{{#if email}}{{email}}{{else}}Valued Customer{{/if}}{{/if}}",
+      "description": "Try firstName, then email, then default"
+    },
+    "tier_based_greeting": {
+      "name": "Tier-Based Personalized Greeting",
+      "code": "{{#ifEq loyaltyTier \"Platinum\"}}💎 Welcome, Elite Member {{firstName}}!{{else}}{{#ifEq loyaltyTier \"Gold\"}}⭐ Hi {{firstName}}!{{else}}Hello {{firstName}}!{{/ifEq}}{{/ifEq}}",
+      "use_case": "Different greetings based on membership tier"
+    }
+  },
+  "conditional_content": {
+    "vip_exclusive_content": {
+      "name": "VIP-Only Content Block",
+      "code": "{{#ifGt loyaltyPoints 1000}}\n  🌟 VIP Member Benefits:\n  {{#catalog \"vipOffers\" featuredOfferId as |offer|}}\n    - {{offer.title}}: {{offer.discount}}% off\n  {{/catalog}}\n{{else}}\n  Earn {{math 1000 '-' loyaltyPoints}} more points for VIP status!\n{{/ifGt}}",
+      "use_case": "Show exclusive content to high-value customers"
+    },
+    "age_restricted_content": {
+      "name": "Age Verification Content",
+      "code": "{{#ifGte age 21}}\n  Check out our new French wines!\n{{else}}\n  Check out our non-alcoholic beverages!\n{{/ifGte}}",
+      "use_case": "Age-restricted product recommendations"
+    },
+    "subscription_status": {
+      "name": "Active Subscription Check",
+      "code": "{{#if hasActiveSubscription}}\n  Your subscription is active until {{dateFormat subscriptionEndDate \"MMMM d, yyyy\"}}.\n{{else}}\n  <a href=\"{{renewalUrl}}\">Renew your subscription</a> and save 20%!\n{{/if}}",
+      "use_case": "Different messaging for active vs inactive subscribers"
+    },
+    "purchase_history": {
+      "name": "Purchase History-Based Messaging",
+      "code": "{{#ifGt totalPurchases 0}}\n  Welcome back! Your last purchase was {{dateFormat lastPurchaseDate \"MMMM d\"}}.\n{{else}}\n  Complete your first purchase and get 15% off!\n{{/if}}",
+      "use_case": "New vs returning customer messaging"
+    }
+  },
+  "dates_and_times": {
+    "dynamic_copyright": {
+      "name": "Dynamic Copyright Year",
+      "code": "© {{now format=\"yyyy\"}} Company Name. All rights reserved.",
+      "use_case": "Auto-updating copyright year"
+    },
+    "expiration_countdown": {
+      "name": "Offer Expiration with Countdown",
+      "code": "Your offer expires on {{dateFormat (dateMath \"now\" \"+7d\") \"MMMM d, yyyy\"}}",
+      "use_case": "Dynamic expiration date",
+      "variants": [
+        {
+          "description": "Days until expiration",
+          "code": "{{math (dateFormat expirationDate \"yyyyMMdd\") '-' (dateFormat \"now\" \"yyyyMMdd\")}} days remaining"
+        }
+      ]
+    },
+    "birthday_message": {
+      "name": "Birthday Detection and Message",
+      "code": "{{#ifEq (dateFormat birthDate \"MM-dd\") (now format=\"MM-dd\")}}\n  🎉 Happy Birthday, {{firstName}}! Enjoy 25% off today!\n{{/ifEq}}",
+      "use_case": "Birthday-specific messaging"
+    },
+    "subscription_renewal": {
+      "name": "Subscription Renewal Reminder",
+      "code": "Your subscription renews on {{dateFormat subscriptionRenewalDate \"MMMM d, yyyy\"}} for {{numberFormat subscriptionPrice \"currency\" locale}}.",
+      "use_case": "Renewal date display"
+    },
+    "trial_expiration": {
+      "name": "Trial Expiration Warning",
+      "code": "{{#ifLt (dateMath \"now\" \"+3d\") trialEndDate}}\n  ⏰ Your trial expires in less than 3 days!\n{{/ifLt}}",
+      "use_case": "Urgency messaging for trial expiration"
+    },
+    "time_based_greeting": {
+      "name": "Time of Day Greeting",
+      "code": "{{#ifLt (now format=\"HH\") \"12\"}}Good morning{{else}}{{#ifLt (now format=\"HH\") \"18\"}}Good afternoon{{else}}Good evening{{/ifLt}}{{/ifLt}}, {{firstName}}!",
+      "use_case": "Dynamic greeting based on time of day"
+    }
+  },
+  "pricing_and_currency": {
+    "localized_price": {
+      "name": "Localized Currency Display",
+      "code": "{{numberFormat price \"currency\" locale}}",
+      "variants": [
+        {
+          "description": "With explicit locale",
+          "code": "{{numberFormat price \"currency\" \"en_US\"}}"
+        },
+        {
+          "description": "Multiple currencies",
+          "code": "US: {{numberFormat price \"currency\" \"en_US\"}} | EU: {{numberFormat price \"currency\" \"de_DE\"}}"
+        }
+      ]
+    },
+    "discount_calculation": {
+      "name": "Show Original and Discounted Price",
+      "code": "{{#ifGt originalPrice price}}\n  <span style=\"text-decoration: line-through;\">{{numberFormat originalPrice \"currency\" locale}}</span>\n  <span style=\"color: red;\">{{numberFormat price \"currency\" locale}}</span>\n  <span class=\"badge\">Save {{math ((originalPrice - price) / originalPrice * 100) 'round'}}%!</span>\n{{else}}\n  <span>{{numberFormat price \"currency\" locale}}</span>\n{{/ifGt}}",
+      "use_case": "Sale price display with original price strikethrough"
+    },
+    "cart_total": {
+      "name": "Shopping Cart Total",
+      "code": "Cart Total: {{numberFormat cartTotal \"currency\" locale}}\n{{#ifGt cartTotal 50}}\n  Free shipping on orders over $50!\n{{else}}\n  Add {{numberFormat (math 50 '-' cartTotal) \"currency\" locale}} more for free shipping.\n{{/ifGt}}",
+      "use_case": "Cart total with free shipping threshold"
+    },
+    "tiered_pricing": {
+      "name": "Tiered Pricing Display",
+      "code": "{{#ifEq membershipLevel \"Premium\"}}\n  Your price: {{numberFormat (math price '*' 0.8) \"currency\" locale}} (20% off)\n{{else}}{{#ifEq membershipLevel \"Standard\"}}\n  Your price: {{numberFormat (math price '*' 0.9) \"currency\" locale}} (10% off)\n{{else}}\n  Regular price: {{numberFormat price \"currency\" locale}}\n{{/ifEq}}{{/ifEq}}",
+      "use_case": "Different prices based on membership tier"
+    }
+  },
+  "product_recommendations": {
+    "catalog_product_loop": {
+      "name": "Product Recommendation Loop",
+      "code": "{{#each recommendedProducts}}\n  {{#catalog \"products\" this as |product|}}\n    <div class=\"product-card\">\n      <img src=\"{{product.imageUrl}}\" alt=\"{{product.name}}\">\n      <h3>{{product.name}}</h3>\n      <p>{{abbreviate product.description 100}}</p>\n      <span>{{numberFormat product.price \"currency\" locale}}</span>\n      <a href=\"{{product.url}}\">Shop Now</a>\n    </div>\n  {{/catalog}}\n{{/each}}",
+      "use_case": "Display recommended products from catalog"
+    },
+    "similar_items": {
+      "name": "Similar Items Section",
+      "code": "<h2>You Might Also Like</h2>\n{{#each similarProducts}}\n  {{#catalog \"products\" this.productId as |product|}}\n    <div class=\"similar-item\">\n      <img src=\"{{product.thumbnailUrl}}\">\n      <h4>{{product.name}}</h4>\n      <span>{{numberFormat product.price \"currency\" locale}}</span>\n    </div>\n  {{/catalog}}\n{{/each}}",
+      "use_case": "Similar product suggestions"
+    },
+    "data_feed_recommendations": {
+      "name": "Data Feed Product Recommendations",
+      "code": "{{#each [[recommendedProducts]]}}\n  <div class=\"recommendation\">\n    <img src=\"[[this.image]]\" alt=\"[[this.title]]\">\n    <h3>[[this.title]]</h3>\n    <p>[[this.description]]</p>\n    <div class=\"pricing\">\n      {{#ifGt [[this.discount]] 0}}\n        <span class=\"original\">{{numberFormat [[this.originalPrice]] \"currency\" locale}}</span>\n        <span class=\"sale\">{{numberFormat [[this.price]] \"currency\" locale}}</span>\n        <span class=\"badge\">[[this.discount]]% OFF</span>\n      {{else}}\n        <span>{{numberFormat [[this.price]] \"currency\" locale}}</span>\n      {{/ifGt}}\n    </div>\n    <a href=\"[[this.url]]\">Shop Now</a>\n  </div>\n{{/each}}",
+      "use_case": "Dynamic recommendations from data feed"
+    }
+  },
+  "abandoned_cart": {
+    "cart_reminder": {
+      "name": "Abandoned Cart Email",
+      "code": "<h1>You left {{cartItemCount}} item{{#ifGt cartItemCount 1}}s{{/ifGt}} in your cart!</h1>\n\n{{#each cartItems}}\n  <div class=\"cart-item\">\n    <img src=\"{{this.imageUrl}}\" alt=\"{{this.name}}\">\n    <h3>{{this.name}}</h3>\n    <p>{{this.description}}</p>\n    <span>{{numberFormat this.price \"currency\" locale}}</span>\n    <p>Quantity: {{this.quantity}}</p>\n  </div>\n{{/each}}\n\n<div class=\"cart-total\">\n  <strong>Total: {{numberFormat cartTotal \"currency\" locale}}</strong>\n</div>\n\n<a href=\"{{checkoutUrl}}\" class=\"btn\">Complete Your Purchase</a>\n\n{{#ifGt cartTotal 100}}\n  <p>🎁 Orders over $100 get free shipping!</p>\n{{/ifGt}}",
+      "use_case": "Abandoned cart recovery email"
+    },
+    "cart_with_urgency": {
+      "name": "Abandoned Cart with Urgency",
+      "code": "<h1>Hurry! Your cart expires in 24 hours</h1>\n<p>Items in your cart may sell out soon.</p>\n\n{{#each cartItems}}\n  <div class=\"cart-item\">\n    <h3>{{this.name}}</h3>\n    <span>{{numberFormat this.price \"currency\" locale}}</span>\n    {{#ifLt this.stockLevel 10}}\n      <span class=\"low-stock\">Only {{this.stockLevel}} left!</span>\n    {{/ifLt}}\n  </div>\n{{/each}}\n\n<a href=\"{{checkoutUrl}}\">Complete Purchase Now</a>",
+      "use_case": "Create urgency for abandoned cart"
+    }
+  },
+  "emails_with_snippets": {
+    "full_email_structure": {
+      "name": "Complete Email with Snippets",
+      "code": "<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <title>{{emailSubject}}</title>\n</head>\n<body>\n  {{{snippet \"email_header\" logoUrl=companyLogoUrl title=\"Weekly Newsletter\"}}}\n  \n  <div class=\"content\">\n    <h1>Hi {{firstName}}!</h1>\n    \n    {{#if hasPromotion}}\n      {{{snippet \"promo_banner\" \n        discount=promoDiscount \n        code=promoCode \n        expirationDate=(dateFormat promoExpiration \"MMMM d\")}}}\n    {{/if}}\n    \n    <div class=\"main-content\">\n      {{{mainContent}}}\n    </div>\n    \n    {{#ifGte loyaltyPoints 500}}\n      {{{snippet \"vip_section\" points=loyaltyPoints tier=loyaltyTier}}}\n    {{/ifGte}}\n  </div>\n  \n  {{{snippet \"email_footer\" \n    companyName=companyName \n    year=(now format=\"yyyy\") \n    unsubscribeUrl=unsubscribeUrl}}}\n</body>\n</html>",
+      "use_case": "Full email template structure with reusable snippets"
+    },
+    "subject_line_snippet": {
+      "name": "Dynamic Subject Line with Snippet",
+      "code": "{{{snippet \"subject_prefix\" tier=loyaltyTier}}} - {{offerTitle}}",
+      "use_case": "Consistent subject line prefix across templates"
+    }
+  },
+  "urls_and_links": {
+    "secure_profile_link": {
+      "name": "Secure Profile Link with HMAC",
+      "code": "<a href=\"https://example.com/profile?id={{hmacSHA256 userId}}\">View Your Profile</a>",
+      "use_case": "Secure user-specific links"
+    },
+    "utm_tracking": {
+      "name": "UTM Parameter Tracking",
+      "code": "<a href=\"{{productUrl}}?utm_source=iterable&utm_medium=email&utm_campaign={{campaignName}}&utm_content={{templateId}}\">Shop Now</a>",
+      "use_case": "Track email campaign performance"
+    },
+    "deep_link": {
+      "name": "Mobile App Deep Link",
+      "code": "myapp://product/{{productId}}?user={{urlEncode userId}}&source=email",
+      "use_case": "Direct users to specific app screens"
+    },
+    "dynamic_tracking_pixel": {
+      "name": "Tracking Pixel with User Data",
+      "code": "<img src=\"https://tracking.example.com/pixel?userId={{userId}}&campaignId={{campaignId}}&timestamp={{timestamp}}\" width=\"1\" height=\"1\" />",
+      "use_case": "Email open tracking"
+    }
+  },
+  "data_validation": {
+    "safe_field_access": {
+      "name": "Safe Field Access with Fallback",
+      "code": "{{#if user.profile.preferences.newsletter}}\n  {{user.profile.preferences.newsletter}}\n{{else}}\n  Not specified\n{{/if}}",
+      "use_case": "Safely access nested fields that might not exist"
+    },
+    "numeric_field_check": {
+      "name": "Numeric Field Validation",
+      "code": "{{#if totalSpent}}\n  You've spent {{numberFormat totalSpent \"currency\" locale}} with us!\n{{else}}\n  Start shopping to earn rewards!\n{{/if}}",
+      "use_case": "Check if numeric field exists before using"
+    },
+    "array_not_empty": {
+      "name": "Check Array Has Items",
+      "code": "{{#if recommendedProducts}}\n  {{#if recommendedProducts.length}}\n    <h2>Recommended for You</h2>\n    {{#each recommendedProducts}}\n      <div>{{this.name}}</div>\n    {{/each}}\n  {{/if}}\n{{/if}}",
+      "use_case": "Ensure array exists and is not empty"
+    }
+  },
+  "localization": {
+    "multi_language": {
+      "name": "Multi-Language Content",
+      "code": "{{#ifEq locale \"es_ES\"}}\n  <h1>¡Hola {{firstName}}!</h1>\n  <p>Bienvenido a nuestra tienda.</p>\n{{else}}{{#ifEq locale \"fr_FR\"}}\n  <h1>Bonjour {{firstName}}!</h1>\n  <p>Bienvenue dans notre boutique.</p>\n{{else}}\n  <h1>Hello {{firstName}}!</h1>\n  <p>Welcome to our store.</p>\n{{/ifEq}}{{/ifEq}}",
+      "use_case": "Serve content in user's preferred language"
+    },
+    "regional_content": {
+      "name": "Region-Specific Content",
+      "code": "{{#ifEq country \"US\"}}\n  Free shipping on orders over $50!\n{{else}}{{#ifEq country \"CA\"}}\n  Free shipping on orders over $65 CAD!\n{{else}}\n  International shipping available.\n{{/ifEq}}{{/ifEq}}",
+      "use_case": "Localized shipping and pricing messages"
+    }
+  },
+  "social_proof": {
+    "purchase_count": {
+      "name": "Social Proof with Purchase Count",
+      "code": "{{#ifGt productPurchaseCount 100}}\n  🔥 Hot Item! Over {{productPurchaseCount}} purchased this month!\n{{else}}{{#ifGt productPurchaseCount 10}}\n  Popular choice! {{productPurchaseCount}} customers bought this.\n{{/ifGt}}{{/ifGt}}",
+      "use_case": "Display social proof based on purchase volume"
+    },
+    "review_rating": {
+      "name": "Star Rating Display",
+      "code": "{{#ifGte averageRating 4.5}}\n  ⭐⭐⭐⭐⭐ ({{reviewCount}} reviews)\n{{else}}{{#ifGte averageRating 4.0}}\n  ⭐⭐⭐⭐ ({{reviewCount}} reviews)\n{{else}}\n  ⭐⭐⭐ ({{reviewCount}} reviews)\n{{/ifGte}}{{/ifGte}}",
+      "use_case": "Visual star rating representation"
+    }
+  },
+  "progress_tracking": {
+    "loyalty_progress": {
+      "name": "Loyalty Points Progress Bar",
+      "code": "{{assign \"progress\" (math loyaltyPoints '/' nextTierThreshold '*' 100)}}\n<div class=\"progress-bar\">\n  <div class=\"progress-fill\" style=\"width: {{progress}}%\"></div>\n</div>\n<p>You're {{math nextTierThreshold '-' loyaltyPoints}} points away from {{nextTierName}}!</p>",
+      "use_case": "Visual progress toward next tier"
+    },
+    "profile_completion": {
+      "name": "Profile Completion Percentage",
+      "code": "{{assign \"completed\" 0}}\n{{#if firstName}}{{assign \"completed\" (math completed '+' 20)}}{{/if}}\n{{#if lastName}}{{assign \"completed\" (math completed '+' 20)}}{{/if}}\n{{#if phone}}{{assign \"completed\" (math completed '+' 20)}}{{/if}}\n{{#if address}}{{assign \"completed\" (math completed '+' 20)}}{{/if}}\n{{#if preferences}}{{assign \"completed\" (math completed '+' 20)}}{{/if}}\n\nYour profile is {{completed}}% complete!\n{{#ifLt completed 100}}\n  <a href=\"{{profileUrl}}\">Complete your profile</a> to unlock rewards.\n{{/ifLt}}",
+      "use_case": "Encourage profile completion"
+    }
+  },
+  "logic_snippets": {
+    "overview": {
+      "name": "Snippets for Pure Handlebars Logic",
+      "description": "Snippets don't have to output HTML - they can be pure logic containers that prepare data using {{assign}}",
+      "use_case": "Essential for drag-and-drop email builders where you can't use {{#each}} loops in static grid layouts",
+      "key_concept": "Handlebars executes top-to-bottom. Logic snippets run first to prepare variables, then those variables are referenced in static positions."
+    },
+    "grid_data_preparation": {
+      "name": "2x2 Product Grid with Catalog Data",
+      "problem": "Drag-and-drop editors have static grid positions - can't dynamically loop to create cells",
+      "solution": "Use logic snippet to extract collection data into numbered variables (product1Name, product2Name, etc.)",
+      "use_case": "Product grids, featured items, comparison tables in drag-and-drop builders",
+      "logic_snippet": {
+        "snippet_name": "product-grid-data-prep",
+        "snippet_content": "{{!-- Pure logic - no HTML output --}}\n{{!-- Extract first 4 products from collection and assign to variables --}}\n\n{{#each productCollectionItems}}\n  \n  {{!-- Product 1 (top-left) --}}\n  {{#ifEq @index 0}}\n    {{#catalog \"products\" this as |product|}}\n      {{assign \"product1Name\" product.name}}\n      {{assign \"product1Price\" product.price}}\n      {{assign \"product1Image\" product.imageUrl}}\n      {{assign \"product1Url\" product.url}}\n      {{assign \"product1Description\" product.description}}\n    {{/catalog}}\n  {{/ifEq}}\n  \n  {{!-- Product 2 (top-right) --}}\n  {{#ifEq @index 1}}\n    {{#catalog \"products\" this as |product|}}\n      {{assign \"product2Name\" product.name}}\n      {{assign \"product2Price\" product.price}}\n      {{assign \"product2Image\" product.imageUrl}}\n      {{assign \"product2Url\" product.url}}\n      {{assign \"product2Description\" product.description}}\n    {{/catalog}}\n  {{/ifEq}}\n  \n  {{!-- Product 3 (bottom-left) --}}\n  {{#ifEq @index 2}}\n    {{#catalog \"products\" this as |product|}}\n      {{assign \"product3Name\" product.name}}\n      {{assign \"product3Price\" product.price}}\n      {{assign \"product3Image\" product.imageUrl}}\n      {{assign \"product3Url\" product.url}}\n      {{assign \"product3Description\" product.description}}\n    {{/catalog}}\n  {{/ifEq}}\n  \n  {{!-- Product 4 (bottom-right) --}}\n  {{#ifEq @index 3}}\n    {{#catalog \"products\" this as |product|}}\n      {{assign \"product4Name\" product.name}}\n      {{assign \"product4Price\" product.price}}\n      {{assign \"product4Image\" product.imageUrl}}\n      {{assign \"product4Url\" product.url}}\n      {{assign \"product4Description\" product.description}}\n    {{/catalog}}\n  {{/ifEq}}\n  \n{{/each}}",
+        "description": "This snippet outputs nothing - it just prepares variables"
+      },
+      "template_usage": {
+        "step_1": {
+          "description": "Call logic snippet at top of template",
+          "code": "<!DOCTYPE html>\n<html>\n<body>\n  {{!-- Run logic snippet FIRST --}}\n  {{{snippet \"product-grid-data-prep\"}}}\n  \n  {{!-- Now all product variables are available --}}\n</body>\n</html>"
+        },
+        "step_2": {
+          "description": "Use variables in drag-and-drop grid cells",
+          "grid_cell_1": "<a href=\"{{product1Url}}\">\n  <img src=\"{{product1Image}}\" alt=\"{{product1Name}}\" width=\"250\">\n</a>\n<h3>{{product1Name}}</h3>\n<p>{{abbreviate product1Description 80}}</p>\n<p><strong>{{numberFormat product1Price \"currency\" locale}}</strong></p>\n<a href=\"{{product1Url}}\" class=\"button\">Shop Now</a>",
+          "grid_cell_2": "<a href=\"{{product2Url}}\">\n  <img src=\"{{product2Image}}\" alt=\"{{product2Name}}\" width=\"250\">\n</a>\n<h3>{{product2Name}}</h3>\n<p>{{abbreviate product2Description 80}}</p>\n<p><strong>{{numberFormat product2Price \"currency\" locale}}</strong></p>\n<a href=\"{{product2Url}}\" class=\"button\">Shop Now</a>",
+          "grid_cell_3": "{{product3Name}} + similar pattern",
+          "grid_cell_4": "{{product4Name}} + similar pattern"
+        }
+      },
+      "with_display_snippet": {
+        "description": "Combine logic snippet with reusable display snippet for even cleaner code",
+        "display_snippet_name": "product-cell",
+        "display_snippet_content": "<div class=\"product-cell\" style=\"text-align: center; padding: 20px;\">\n  <a href=\"{{productUrl}}\">\n    <img src=\"{{productImage}}\" alt=\"{{productName}}\" width=\"250\">\n  </a>\n  <h3>{{productName}}</h3>\n  <p>{{abbreviate productDescription 80}}</p>\n  <p><strong>{{numberFormat productPrice \"currency\" locale}}</strong></p>\n  <a href=\"{{productUrl}}\" class=\"button\">Shop Now</a>\n</div>",
+        "grid_cell_usage": "{{{snippet \"product-cell\" \n    productName=product1Name \n    productPrice=product1Price \n    productImage=product1Image \n    productUrl=product1Url \n    productDescription=product1Description}}}"
+      },
+      "benefits": [
+        "Works perfectly with drag-and-drop builders",
+        "Separates data logic from presentation",
+        "Reusable across multiple templates",
+        "Easy to maintain and update",
+        "Clean, organized code structure"
+      ]
+    },
+    "conditional_data_prep": {
+      "name": "User Tier Data Preparation",
+      "use_case": "Set variables based on user attributes for consistent styling/messaging",
+      "snippet_name": "user-tier-data",
+      "snippet_content": "{{#ifEq loyaltyTier \"Platinum\"}}\n  {{assign \"tierBadge\" \"💎\"}}\n  {{assign \"tierColor\" \"#9333ea\"}}\n  {{assign \"tierName\" \"Platinum Elite\"}}\n  {{assign \"discountPercent\" 20}}\n  {{assign \"freeShipping\" true}}\n{{else}}{{#ifEq loyaltyTier \"Gold\"}}\n  {{assign \"tierBadge\" \"⭐\"}}\n  {{assign \"tierColor\" \"#fbbf24\"}}\n  {{assign \"tierName\" \"Gold Member\"}}\n  {{assign \"discountPercent\" 15}}\n  {{assign \"freeShipping\" true}}\n{{else}}\n  {{assign \"tierBadge\" \"🎁\"}}\n  {{assign \"tierColor\" \"#3b82f6\"}}\n  {{assign \"tierName\" \"Member\"}}\n  {{assign \"discountPercent\" 10}}\n  {{assign \"freeShipping\" false}}\n{{/ifEq}}{{/ifEq}}",
+      "template_usage": "{{!-- Call logic snippet --}}\n{{{snippet \"user-tier-data\"}}}\n\n{{!-- Use variables anywhere --}}\n<h1 style=\"color: {{tierColor}};\">{{tierBadge}} Welcome, {{tierName}}!</h1>\n<p>Your discount: {{discountPercent}}%</p>\n{{#if freeShipping}}\n  <p>✓ Free shipping on all orders</p>\n{{/if}}"
+    },
+    "date_calculations": {
+      "name": "Pre-calculate Date Values",
+      "use_case": "Calculate dates once, use multiple times throughout template",
+      "snippet_name": "date-calculations",
+      "snippet_content": "{{assign \"today\" (now format=\"yyyy-MM-dd\")}}\n{{assign \"todayFormatted\" (now format=\"MMMM d, yyyy\")}}\n{{assign \"nextWeek\" (dateFormat (dateMath \"now\" \"+7d\") \"MMMM d\")}}\n{{assign \"nextMonth\" (dateFormat (dateMath \"now\" \"+30d\") \"MMMM d, yyyy\")}}\n{{assign \"currentYear\" (now format=\"yyyy\")}}\n\n{{#if subscriptionEndDate}}\n  {{assign \"expirationFormatted\" (dateFormat subscriptionEndDate \"MMMM d, yyyy\")}}\n  {{assign \"daysRemaining\" (math (dateFormat subscriptionEndDate \"yyyyMMdd\") '-' (dateFormat \"now\" \"yyyyMMdd\"))}}\n{{/if}}",
+      "template_usage": "{{!-- All date variables now available --}}\n<p>Today: {{todayFormatted}}</p>\n<p>Subscription expires: {{expirationFormatted}}</p>\n<p>Days remaining: {{daysRemaining}}</p>\n<footer>© {{currentYear}} Company Name</footer>"
+    },
+    "cart_calculations": {
+      "name": "Shopping Cart Math",
+      "use_case": "Calculate totals once, reference throughout checkout email",
+      "snippet_name": "cart-calculations",
+      "snippet_content": "{{assign \"subtotal\" 0}}\n{{assign \"itemCount\" 0}}\n\n{{!-- Sum up cart items --}}\n{{#each cartItems}}\n  {{assign \"itemTotal\" (math this.price '*' this.quantity)}}\n  {{assign \"subtotal\" (math subtotal '+' itemTotal)}}\n  {{assign \"itemCount\" (math itemCount '+' this.quantity)}}\n{{/each}}\n\n{{!-- Calculate tax and shipping --}}\n{{assign \"taxRate\" 0.08}}\n{{assign \"tax\" (math subtotal '*' taxRate)}}\n\n{{#ifGt subtotal 50}}\n  {{assign \"shipping\" 0}}\n  {{assign \"freeShippingEligible\" true}}\n{{else}}\n  {{assign \"shipping\" 5.99}}\n  {{assign \"freeShippingEligible\" false}}\n  {{assign \"amountNeededForFreeShipping\" (math 50 '-' subtotal)}}\n{{/ifGt}}\n\n{{!-- Final total --}}\n{{assign \"total\" (math (math subtotal '+' tax) '+' shipping)}}",
+      "template_usage": "<h2>Order Summary</h2>\n<p>Items ({{itemCount}}): {{numberFormat subtotal \"currency\" locale}}</p>\n<p>Tax: {{numberFormat tax \"currency\" locale}}</p>\n<p>Shipping: {{#if freeShippingEligible}}FREE{{else}}{{numberFormat shipping \"currency\" locale}}{{/if}}</p>\n<p><strong>Total: {{numberFormat total \"currency\" locale}}</strong></p>\n\n{{#unless freeShippingEligible}}\n  <p>Add {{numberFormat amountNeededForFreeShipping \"currency\" locale}} more for free shipping!</p>\n{{/unless}}"
+    },
+    "event_data_extraction": {
+      "name": "Extract Event Data for Grid",
+      "use_case": "Event-triggered journey passes productId, snippet extracts catalog details",
+      "snippet_name": "event-product-data",
+      "snippet_content": "{{!-- Event provides productId, extract catalog data --}}\n{{#catalog \"products\" productId as |product|}}\n  {{assign \"purchasedProductName\" product.name}}\n  {{assign \"purchasedProductPrice\" product.price}}\n  {{assign \"purchasedProductImage\" product.imageUrl}}\n  {{assign \"purchasedProductCategory\" product.category}}\n  {{assign \"purchasedProductBrand\" product.brand}}\n{{/catalog}}\n\n{{!-- Now get related products from same category --}}\n{{!-- Assuming you have a collection configured --}}\n{{#each relatedProductIds}}\n  {{#ifEq @index 0}}\n    {{#catalog \"products\" this as |p|}}\n      {{assign \"related1Name\" p.name}}\n      {{assign \"related1Price\" p.price}}\n      {{assign \"related1Image\" p.imageUrl}}\n      {{assign \"related1Url\" p.url}}\n    {{/catalog}}\n  {{/ifEq}}\n  {{#ifEq @index 1}}\n    {{#catalog \"products\" this as |p|}}\n      {{assign \"related2Name\" p.name}}\n      {{assign \"related2Price\" p.price}}\n      {{assign \"related2Image\" p.imageUrl}}\n      {{assign \"related2Url\" p.url}}\n    {{/catalog}}\n  {{/ifEq}}\n{{/each}}",
+      "journey_flow": "Event (productId) → Template → Logic Snippet (extract catalog) → Display variables in grid"
+    },
+    "best_practices": {
+      "naming": {
+        "rule": "Name logic snippets clearly with suffix like -data-prep or -calculations",
+        "examples": [
+          "product-grid-data-prep",
+          "cart-calculations",
+          "user-tier-data",
+          "date-calculations"
+        ]
+      },
+      "placement": {
+        "rule": "Call logic snippets at the TOP of your template before any visual content",
+        "code": "<!DOCTYPE html>\n<html>\n<body>\n  {{!-- ALWAYS FIRST --}}\n  {{{snippet \"logic-snippet-name\"}}}\n  \n  {{!-- Then your content --}}\n</body>\n</html>"
+      },
+      "documentation": {
+        "rule": "Comment what variables the snippet creates",
+        "example": "{{!-- This snippet creates: product1Name, product1Price, product1Image, product1Url for positions 1-4 --}}"
+      },
+      "initialization": {
+        "rule": "Initialize variables with defaults before conditional assignment",
+        "example": "{{assign \"product1Name\" \"\"}}\n{{assign \"hasProduct1\" false}}\n\n{{!-- Then conditionally assign --}}\n{{#if someCondition}}\n  {{assign \"product1Name\" \"Actual Value\"}}\n  {{assign \"hasProduct1\" true}}\n{{/if}}"
+      },
+      "fallbacks": {
+        "rule": "Always handle cases where data might not exist",
+        "example": "{{#if hasProduct1}}\n  {{{snippet \"product-cell\" productName=product1Name ...}}}\n{{else}}\n  <div>No product available</div>\n{{/if}}"
+      }
+    },
+    "common_use_cases": [
+      "2x2, 3x3, or any NxN product grids in drag-and-drop builders",
+      "Comparison tables with static columns",
+      "Featured items sections with fixed positions",
+      "Tier-based styling and messaging throughout template",
+      "Complex calculations used in multiple places",
+      "Event data extraction for multi-section emails",
+      "Date calculations for countdowns, expirations, anniversaries",
+      "Shopping cart totals, tax, shipping calculations"
+    ],
+    "why_this_works": {
+      "execution_order": "Handlebars processes top-to-bottom. Logic snippet runs first, assigns variables, then those variables exist for rest of template.",
+      "separation_of_concerns": "Logic (data extraction/calculation) separated from presentation (display/styling)",
+      "drag_and_drop_compatibility": "Static grid positions can reference dynamic variables - best of both worlds",
+      "maintainability": "Change logic in one place (snippet) rather than in every template",
+      "reusability": "Same logic snippet can be used across multiple templates/campaigns"
+    }
+  }
+}
+

@@ -1,0 +1,271 @@
+{
+  "description": "Universal merge parameters are always available in Iterable templates, regardless of project data structure. These provide access to system-level data about campaigns, recipients, and brand information.",
+  "unsubscribe_links": {
+    "compliance_requirement": "Email marketing messages must include unsubscribe functionality (CAN-SPAM compliance)",
+    "parameters": {
+      "unsubscribeUrl": {
+        "name": "unsubscribeUrl",
+        "syntax": "{{unsubscribeUrl}}",
+        "description": "Unsubscribes user from the message channel associated with the message",
+        "use_in": "Marketing emails",
+        "example": "<a href=\"{{unsubscribeUrl}}\">Unsubscribe</a>",
+        "compliance": "Required for marketing emails"
+      },
+      "unsubscribeMessageTypeUrl": {
+        "name": "unsubscribeMessageTypeUrl",
+        "syntax": "{{unsubscribeMessageTypeUrl}}",
+        "description": "Unsubscribes user from the specific message type",
+        "use_in": "Specific campaign types (promotional vs transactional)",
+        "example": "<a href=\"{{unsubscribeMessageTypeUrl}}\">Unsubscribe from promotions</a>"
+      },
+      "hostedUnsubscribeUrl": {
+        "name": "hostedUnsubscribeUrl",
+        "syntax": "{{hostedUnsubscribeUrl}}",
+        "description": "Links to custom-hosted unsubscribe page",
+        "configuration": "Project Settings → Hosted Unsubscribe URL",
+        "example": "<a href=\"{{hostedUnsubscribeUrl}}\">Manage preferences</a>",
+        "supports_handlebars": true,
+        "url_example": "https://example.com/preferences?email={{urlEncode email}}&userId={{userId}}"
+      },
+      "unsubscribeByPhoneUrl": {
+        "name": "unsubscribeByPhoneUrl",
+        "syntax": "{{unsubscribeByPhoneUrl}}",
+        "description": "For international SMS sent from alphanumeric sender IDs",
+        "use_case": "Provides web-based opt-out for users who can't text STOP",
+        "example": "To opt out, visit: {{unsubscribeByPhoneUrl}}"
+      }
+    },
+    "auto_append": {
+      "setting": "Auto-append Unsubscribe Block (Project Settings)",
+      "when_enabled": "Iterable automatically adds {{unsubscribeUrl}} to marketing emails",
+      "when_disabled": "Must manually include unsubscribe link"
+    }
+  },
+  "campaign_metadata": {
+    "campaign_information": {
+      "campaignName": {
+        "syntax": "{{campaignName}}",
+        "description": "Name of the campaign",
+        "example_output": "Spring Sale 2024"
+      },
+      "campaignId": {
+        "syntax": "{{campaignId}}",
+        "description": "Unique campaign ID",
+        "example_output": "123456",
+        "type": "number"
+      },
+      "recurringCampaignId": {
+        "syntax": "{{recurringCampaignId}}",
+        "description": "Parent campaign ID for recurring campaigns",
+        "type": "number"
+      }
+    },
+    "template_information": {
+      "templateName": {
+        "syntax": "{{templateName}}",
+        "description": "Name of the template",
+        "example_output": "Welcome Email"
+      },
+      "templateId": {
+        "syntax": "{{templateId}}",
+        "description": "Unique template ID",
+        "type": "number"
+      },
+      "clientTemplateId": {
+        "syntax": "{{clientTemplateId}}",
+        "description": "Custom template ID set via API",
+        "type": "string"
+      }
+    },
+    "channels_and_types": {
+      "channelId": {
+        "syntax": "{{channelId}}",
+        "description": "Message channel ID",
+        "type": "number"
+      },
+      "messageTypeId": {
+        "syntax": "{{messageTypeId}}",
+        "description": "Message type ID",
+        "type": "number"
+      }
+    },
+    "workflow": {
+      "workflowId": {
+        "syntax": "{{workflowId}}",
+        "description": "ID of the journey/workflow that triggered the send",
+        "type": "number",
+        "use_case": "Track which journey sent the message"
+      }
+    },
+    "audience": {
+      "sendListIds": {
+        "syntax": "{{sendListIds}}",
+        "description": "Array of list IDs campaign was sent to",
+        "type": "array",
+        "formatted_example": "{{join sendListIds \",\"}}",
+        "formatted_output": "101,205,308"
+      }
+    },
+    "usage_example": {
+      "description": "Footer metadata for tracking",
+      "code": "<div class=\"email-footer\" style=\"font-size: 10px; color: #999;\">\n  Campaign: {{campaignName}} ({{campaignId}})<br>\n  Template: {{templateName}}<br>\n  {{#if workflowId}}Journey ID: {{workflowId}}{{/if}}\n</div>"
+    }
+  },
+  "brand_details": {
+    "companyName": {
+      "syntax": "{{companyName}}",
+      "description": "Your project's name (represents your brand)",
+      "configuration": "Project Settings → Name",
+      "auto_included_in": [
+        "Default unsubscribe blocks",
+        "Subscription pages"
+      ],
+      "example": "<p>© 2025 {{companyName}}. All rights reserved.</p>"
+    },
+    "physicalAddress": {
+      "syntax": "{{physicalAddress}}",
+      "description": "Your company's physical mailing address",
+      "configuration": "Project Settings → Physical Address",
+      "compliance": "Required in email marketing messages (CAN-SPAM)",
+      "example": "<p>{{companyName}}<br>{{physicalAddress}}</p>"
+    },
+    "brandName": {
+      "syntax": "{{brandName}}",
+      "description": "Your brand name for SMS double opt-in",
+      "configuration": "SMS double opt-in message type settings",
+      "max_length": 50,
+      "example": "{{brandName}}: Reply Y to subscribe to text messages about: {{messagingInitiative}}"
+    },
+    "full_footer_example": {
+      "code": "<div class=\"footer\">\n  <p><strong>{{companyName}}</strong></p>\n  <p>{{physicalAddress}}</p>\n  <p>\n    <a href=\"{{unsubscribeUrl}}\">Unsubscribe</a> | \n    <a href=\"{{hostedUnsubscribeUrl}}\">Manage Preferences</a>\n  </p>\n</div>"
+    }
+  },
+  "recipient_details": {
+    "email": {
+      "syntax": "{{email}}",
+      "description": "Recipient's email address",
+      "example": "<p>This email was sent to: {{email}}</p>",
+      "with_fallback": "<p>Email: {{email|fallback=\"N/A\"}}</p>"
+    },
+    "userId": {
+      "syntax": "{{userId}}",
+      "description": "Recipient's user ID",
+      "example": "<p>User ID: {{userId}}</p>",
+      "tracking_example": "<a href=\"https://example.com/profile?userId={{userId}}&email={{urlEncode email}}\">View Profile</a>"
+    },
+    "recommendation": "Always include fallback values for {{email}} and {{userId}} to avoid blank spaces if field is missing"
+  },
+  "system_parameters": {
+    "now": {
+      "syntax": "{{now}}",
+      "description": "Current date/time at send time",
+      "default_format": "MMM DD, YYYY (e.g., Oct 24, 2024)",
+      "supports_formatting": true,
+      "examples": [
+        {
+          "code": "{{now}}",
+          "output": "Oct 24, 2024",
+          "description": "Default format"
+        },
+        {
+          "code": "{{now format=\"yyyy-MM-dd\"}}",
+          "output": "2024-10-24",
+          "description": "ISO date"
+        },
+        {
+          "code": "{{now format=\"EEEE, MMMM d, yyyy\"}}",
+          "output": "Thursday, October 24, 2024",
+          "description": "Full date"
+        },
+        {
+          "code": "{{now format=\"h:mm a\"}}",
+          "output": "3:45 PM",
+          "description": "Time"
+        },
+        {
+          "code": "© {{now format=\"yyyy\"}} Company Name",
+          "output": "© 2024 Company Name",
+          "description": "Dynamic copyright year"
+        }
+      ]
+    },
+    "viewInBrowserUrl": {
+      "syntax": "{{viewInBrowserUrl}}",
+      "description": "Link to web version of email",
+      "benefit": "Allows recipients to view email in browser",
+      "example": "<p><a href=\"{{viewInBrowserUrl}}\">View this email in your browser</a></p>"
+    },
+    "sendSkip": {
+      "syntax": "{{sendSkip cause=\"reason\" param1=value1}}",
+      "description": "Aborts message send and generates a 'send skip' event",
+      "use_case": "Conditional send logic",
+      "parameters": {
+        "cause": "Reason for skipping (optional)",
+        "named_params": "Additional data to store with skip event"
+      },
+      "example": "{{#ifLt creditAvailable product.price}}\n  {{sendSkip cause=\"insufficient credit\" creditAvailable=creditAvailable creditRequired=product.price}}\n{{/ifLt}}",
+      "important": "Must be used within conditional logic to prevent skipping all sends"
+    },
+    "messagingInitiative": {
+      "syntax": "{{messagingInitiative}}",
+      "description": "Describes content of SMS subscription (SMS Double Opt-In)",
+      "configuration": "SMS double opt-in message type settings",
+      "max_length": 100,
+      "example": "{{brandName}}: Reply Y to subscribe to text messages about: {{messagingInitiative}}"
+    },
+    "smsDisclaimerLink": {
+      "syntax": "{{smsDisclaimerLink}}",
+      "description": "URL to your terms/privacy policy (SMS Double Opt-In)",
+      "configuration": "SMS double opt-in message type settings",
+      "requirement": "Must be https:// URL",
+      "example": "{{brandName}}: Msg & data rates may apply. Reply HELP for help, STOP to cancel. Disclaimer: {{smsDisclaimerLink}}"
+    }
+  },
+  "complete_example": {
+    "description": "Professional email footer with all key universal parameters",
+    "code": "<!DOCTYPE html>\n<html>\n<body>\n  <!-- Email content here -->\n  \n  <!-- Professional footer with all key elements -->\n  <div class=\"footer\" style=\"margin-top: 40px; padding: 20px; background-color: #f5f5f5; font-size: 12px; color: #666;\">\n    \n    <!-- Brand info -->\n    <div style=\"margin-bottom: 15px;\">\n      <strong style=\"font-size: 14px;\">{{companyName}}</strong><br>\n      {{physicalAddress}}\n    </div>\n    \n    <!-- Unsubscribe links -->\n    <div style=\"margin-bottom: 15px;\">\n      <a href=\"{{unsubscribeUrl}}\" style=\"color: #007bff;\">Unsubscribe</a> | \n      <a href=\"{{hostedUnsubscribeUrl}}\" style=\"color: #007bff;\">Manage Preferences</a> | \n      <a href=\"{{viewInBrowserUrl}}\" style=\"color: #007bff;\">View in Browser</a>\n    </div>\n    \n    <!-- Metadata for tracking -->\n    <div style=\"font-size: 10px; color: #999;\">\n      Campaign: {{campaignName}} (ID: {{campaignId}})<br>\n      Sent: {{now format=\"MMMM d, yyyy 'at' h:mm a\"}} to {{email}}<br>\n      {{#if workflowId}}Journey: {{workflowId}}<br>{{/if}}\n      Template: {{templateName}}\n    </div>\n    \n    <!-- Copyright -->\n    <div style=\"margin-top: 15px;\">\n      © {{now format=\"yyyy\"}} {{companyName}}. All rights reserved.\n    </div>\n  </div>\n</body>\n</html>"
+  },
+  "best_practices": {
+    "dos": [
+      "Always include unsubscribe links in marketing emails",
+      "Use {{physicalAddress}} in email footers (legal requirement)",
+      "Include {{viewInBrowserUrl}} for better email client compatibility",
+      "Use {{now}} for dynamic dates (copyright years, timestamps)",
+      "Format URLs with urlEncode when passing as query parameters"
+    ],
+    "donts": [
+      "Don't forget unsubscribe links in marketing emails (legal violation)",
+      "Don't manually type unsubscribe URLs (they're unique per recipient)",
+      "Don't use {{sendSkip}} without conditional logic (aborts all sends)",
+      "Don't modify or override system-generated values"
+    ]
+  },
+  "quick_reference": {
+    "compliance_required": [
+      "{{unsubscribeUrl}} - Required in marketing emails",
+      "{{physicalAddress}} - Required in email footers",
+      "{{companyName}} - Should be displayed"
+    ],
+    "user_identification": [
+      "{{email}}",
+      "{{userId}}"
+    ],
+    "campaign_tracking": [
+      "{{campaignId}}",
+      "{{campaignName}}",
+      "{{templateId}}",
+      "{{workflowId}}"
+    ],
+    "dynamic_content": [
+      "{{now}}",
+      "{{viewInBrowserUrl}}"
+    ],
+    "subscription_management": [
+      "{{unsubscribeUrl}}",
+      "{{unsubscribeMessageTypeUrl}}",
+      "{{hostedUnsubscribeUrl}}",
+      "{{unsubscribeByPhoneUrl}}"
+    ]
+  }
+}
+

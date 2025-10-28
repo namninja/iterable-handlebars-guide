@@ -1,0 +1,397 @@
+{
+  "syntax_rules": {
+    "block_helpers_must_close": {
+      "rule": "All block helpers must have matching closing tags",
+      "valid": "{{#if firstName}}\n  Hello {{firstName}}!\n{{/if}}",
+      "invalid": "{{#if firstName}}\n  Hello {{firstName}}!",
+      "error_message": "Expecting 'CLOSE_RAW_BLOCK', got 'EOF'",
+      "examples": [
+        {
+          "helper": "if",
+          "correct": "{{#if condition}}...{{/if}}"
+        },
+        {
+          "helper": "each",
+          "correct": "{{#each array}}...{{/each}}"
+        },
+        {
+          "helper": "unless",
+          "correct": "{{#unless condition}}...{{/unless}}"
+        },
+        {
+          "helper": "and",
+          "correct": "{{#and cond1 cond2}}...{{/and}}"
+        },
+        {
+          "helper": "or",
+          "correct": "{{#or cond1 cond2}}...{{/or}}"
+        },
+        {
+          "helper": "catalog",
+          "correct": "{{#catalog \"name\" id as |item|}}...{{/catalog}}"
+        }
+      ]
+    },
+    "matching_tags": {
+      "rule": "Opening and closing tags must match exactly",
+      "valid": "{{#each items}}\n  {{this.name}}\n{{/each}}",
+      "invalid": "{{#each items}}\n  {{this.name}}\n{{/if}}",
+      "error_message": "Mismatched opening/closing tags"
+    },
+    "proper_nesting": {
+      "rule": "Nested blocks must be properly nested (no interleaving)",
+      "valid": "{{#if isActive}}\n  {{#each items}}\n    {{this.name}}\n  {{/each}}\n{{/if}}",
+      "invalid": "{{#if isActive}}\n  {{#each items}}\n    {{this.name}}\n{{/if}}\n  {{/each}}",
+      "description": "Inner blocks must close before outer blocks"
+    },
+    "helper_arguments": {
+      "rule": "Helper arguments must be properly formatted",
+      "valid_examples": [
+        {
+          "code": "{{dateFormat signupDate \"yyyy-MM-dd\"}}",
+          "description": "Strings must be quoted"
+        },
+        {
+          "code": "{{math age '+' 5}}",
+          "description": "Operators must be quoted"
+        },
+        {
+          "code": "{{#ifGt loyaltyPoints 100}}",
+          "description": "Numbers should NOT be quoted in comparisons"
+        },
+        {
+          "code": "{{numberFormat price maximumFractionDigits=2}}",
+          "description": "Named parameters use = not :"
+        }
+      ],
+      "invalid_examples": [
+        {
+          "code": "{{dateFormat signupDate yyyy-MM-dd}}",
+          "error": "Missing quotes around format string"
+        },
+        {
+          "code": "{{math age + 5}}",
+          "error": "Operator not quoted"
+        },
+        {
+          "code": "{{#ifGt loyaltyPoints \"100\"}}",
+          "error": "Number should not be quoted in comparison"
+        },
+        {
+          "code": "{{numberFormat price maximumFractionDigits:2}}",
+          "error": "Use = not : for named parameters"
+        }
+      ]
+    },
+    "snippet_syntax": {
+      "rule": "Snippets MUST use triple braces, not double braces",
+      "valid": "{{{snippet \"header\" title=\"Welcome\"}}}",
+      "invalid": "{{snippet \"header\" title=\"Welcome\"}}",
+      "error_result": "Shows raw Handlebars code instead of rendering",
+      "description": "Triple braces prevent HTML escaping and allow snippet rendering"
+    },
+    "field_names_with_spaces": {
+      "rule": "Field names with spaces need square brackets",
+      "valid": "{{[First Name]}}",
+      "invalid": "{{First Name}}",
+      "recommendation": "Avoid spaces in field names; use camelCase or snake_case instead"
+    },
+    "array_access": {
+      "rule": "Array indices require bracket notation with dot prefix",
+      "valid": "{{items.[0].name}}",
+      "invalid": "{{items.0.name}}",
+      "examples": [
+        {
+          "code": "{{shoppingCart.[2].price}}",
+          "description": "Access third item in shopping cart"
+        },
+        {
+          "code": "{{products.[0].imageUrl}}",
+          "description": "First product image"
+        }
+      ]
+    },
+    "named_parameters": {
+      "rule": "Named parameters use = not :",
+      "valid": "{{numberFormat price maximumFractionDigits=2}}",
+      "invalid": "{{numberFormat price maximumFractionDigits:2}}",
+      "valid_examples": [
+        "{{dateFormat date format=\"yyyy-MM-dd\" tz=\"America/Los_Angeles\"}}",
+        "{{#catalog \"products\" id required=false as |product|}}",
+        "{{{snippet \"banner\" discount=20 ctaText=\"Shop Now\"}}}"
+      ]
+    },
+    "comments": {
+      "rule": "Use HTML comments, not code comments",
+      "valid": "<!--{{#if firstName}}-->\n  Hello {{firstName}}!\n<!--{{/if}}-->",
+      "invalid": "//{{#if firstName}}\n  Hello {{firstName}}!\n//{{/if}}",
+      "note": "Only comment out structural lines ({{#if}}, {{else}}, {{/if}}), not value lines ({{firstName}})"
+    },
+    "whitespace_control": {
+      "rule": "Use tildes (~) for whitespace control, not just extra spaces",
+      "valid": "{{~#if condition~}}text{{~/if~}}",
+      "invalid": "{{ #if condition }}text{{ /if }}",
+      "examples": [
+        {
+          "code": "{{~tag}}",
+          "description": "Remove leading whitespace"
+        },
+        {
+          "code": "{{tag~}}",
+          "description": "Remove trailing whitespace"
+        },
+        {
+          "code": "{{~tag~}}",
+          "description": "Remove both leading and trailing"
+        }
+      ],
+      "use_cases": [
+        "Deep links",
+        "URLs",
+        "Inline conditional text"
+      ]
+    },
+    "data_feed_syntax": {
+      "rule": "Data feeds use [[]] or {{}} depending on merge context setting",
+      "without_merge": {
+        "syntax": "[[field]]",
+        "example": "[[productName]]",
+        "note": "Must use double square brackets when merge context is disabled"
+      },
+      "with_merge": {
+        "syntax": "{{field}} or [[field]]",
+        "example": "{{productName}}",
+        "note": "Can use either syntax when merge context is enabled",
+        "priority": "User profile data takes priority over data feed data"
+      },
+      "escaped_vs_unescaped": {
+        "escaped": "[[field]] - Escapes HTML",
+        "unescaped": "[[[field]]] - Renders HTML"
+      }
+    },
+    "escaping_rules": {
+      "double_braces": {
+        "syntax": "{{field}}",
+        "behavior": "Escapes HTML (safe for user input)",
+        "example": {
+          "input": "<script>alert('XSS')</script>",
+          "output": "&lt;script&gt;alert('XSS')&lt;/script&gt;"
+        },
+        "use_for": [
+          "User-generated content",
+          "Untrusted data",
+          "Plain text fields",
+          "Names, emails, addresses"
+        ]
+      },
+      "triple_braces": {
+        "syntax": "{{{field}}}",
+        "behavior": "Renders HTML without escaping",
+        "example": {
+          "input": "<strong>Hello</strong>",
+          "output": "<strong>Hello</strong> (renders as bold)"
+        },
+        "use_for": [
+          "Trusted HTML content",
+          "Snippets (required)",
+          "Pre-sanitized CMS content",
+          "Controlled rich text"
+        ],
+        "security_warning": "NEVER use with user-generated content (XSS risk)"
+      }
+    }
+  },
+  "common_errors": {
+    "missing_closing_tag": {
+      "error": "Expecting 'CLOSE_RAW_BLOCK', got 'EOF'",
+      "cause": "Block helper missing closing tag",
+      "fix": "Add matching closing tag ({{/if}}, {{/each}}, etc.)",
+      "example": {
+        "broken": "{{#if isActive}}\n  Content\n<!-- Missing {{/if}} -->",
+        "fixed": "{{#if isActive}}\n  Content\n{{/if}}"
+      }
+    },
+    "parse_error_expecting_id": {
+      "error": "Parse error on line X: ... Expecting 'ID'",
+      "cause": "Invalid helper name or field name",
+      "fix": "Check for typos, ensure field names don't start with numbers",
+      "examples": [
+        "Check helper spelling: ifGt not ifGreaterThan",
+        "Field names can't start with numbers: use userId not 123user"
+      ]
+    },
+    "template_execution_failed": {
+      "error": "Template execution failed",
+      "cause": "Runtime error (missing field, invalid operation)",
+      "fix": "Add fallbacks with defaultIfEmpty or conditional checks",
+      "examples": [
+        "Use {{defaultIfEmpty field \"default\"}}",
+        "Use {{#if field}}{{field}}{{else}}fallback{{/if}}",
+        "Check for null values before math operations"
+      ]
+    },
+    "missing_helper": {
+      "error": "Missing helper: 'helperName'",
+      "cause": "Typo in helper name or using non-existent helper",
+      "fix": "Verify helper name spelling against documentation",
+      "common_mistakes": {
+        "ifGreaterThan": "Use ifGt",
+        "equals": "Use ifEq",
+        "format": "Use dateFormat or numberFormat"
+      }
+    },
+    "partial_not_found": {
+      "error": "The partial X could not be found",
+      "cause": "Snippet doesn't exist or name is misspelled",
+      "fix": "Verify snippet name in Iterable UI (case-sensitive)"
+    }
+  },
+  "validation_checklist": {
+    "before_saving": [
+      {
+        "check": "All block helpers have closing tags",
+        "helpers": ["if", "unless", "each", "and", "or", "catalog", "with"]
+      },
+      {
+        "check": "Nested blocks are properly nested"
+      },
+      {
+        "check": "All strings in helper arguments are quoted"
+      },
+      {
+        "check": "Numbers in comparisons are NOT quoted"
+      },
+      {
+        "check": "Snippets use triple braces {{{snippet}}} not double"
+      },
+      {
+        "check": "Field names with spaces use brackets: {{[Field Name]}}"
+      },
+      {
+        "check": "Array indices use bracket notation: {{array.[0]}}"
+      },
+      {
+        "check": "No undefined helpers (check spelling)"
+      },
+      {
+        "check": "Data feeds use correct syntax: [[]] or {{}} based on settings"
+      },
+      {
+        "check": "Triple braces {{{field}}} only used for trusted content"
+      }
+    ]
+  },
+  "best_practices": {
+    "security": [
+      {
+        "rule": "Always use {{}} (escaped) for user input",
+        "rationale": "Prevents XSS attacks"
+      },
+      {
+        "rule": "Only use {{{}}} (unescaped) for content you control",
+        "examples": ["Your CMS content", "Snippets", "Pre-sanitized data"]
+      },
+      {
+        "rule": "Use HMAC-SHA256 for secure user tokens",
+        "example": "https://example.com/profile?token={{hmacSHA256 userId}}"
+      }
+    ],
+    "performance": [
+      {
+        "rule": "Cache data feed responses when possible",
+        "setting": "Enable 'Cache data feed response' in template settings"
+      },
+      {
+        "rule": "Use snippets for frequently reused content",
+        "benefit": "Reduces template complexity and maintenance"
+      }
+    ],
+    "maintainability": [
+      {
+        "rule": "Use descriptive variable names in snippets",
+        "good": "buttonText, headerColor, ctaUrl",
+        "bad": "t, c, u"
+      },
+      {
+        "rule": "Document complex Handlebars logic with HTML comments",
+        "example": "<!-- Check if user has VIP status before showing exclusive offers -->"
+      },
+      {
+        "rule": "Avoid spaces in field names",
+        "recommendation": "Use camelCase (firstName) or snake_case (first_name)"
+      },
+      {
+        "rule": "Test templates with edge cases",
+        "cases": ["Missing fields", "Null values", "Empty arrays", "Special characters"]
+      }
+    ],
+    "error_handling": [
+      {
+        "rule": "Always provide fallbacks for critical fields",
+        "example": "{{defaultIfEmpty firstName \"Valued Customer\"}}"
+      },
+      {
+        "rule": "Use conditional checks before operations",
+        "example": "{{#if price}}{{numberFormat price \"currency\" locale}}{{else}}Free{{/if}}"
+      },
+      {
+        "rule": "Use required=false in catalog helpers when items may not exist",
+        "example": "{{#catalog \"products\" id required=false as |product|}}...{{/catalog}}"
+      }
+    ]
+  },
+  "wysiwyg_editor": {
+    "special_handling": "When using WYSIWYG editor, comment out Handlebars logic lines",
+    "rule": "Comment out structural lines ({{#if}}, {{else}}, {{/if}}), NOT value lines ({{firstName}})",
+    "example": {
+      "before": "{{#if firstName}}\n  <div>Hey, {{firstName}}!</div>\n{{else}}\n  <div>Hey there!</div>\n{{/if}}",
+      "after": "<!--{{#if firstName}}-->\n  <div>Hey, {{firstName}}!</div>\n<!--{{else}}-->\n  <div>Hey there!</div>\n<!--{{/if}}-->"
+    },
+    "important": "DO NOT comment out value lines like {{firstName}} - only structural Handlebars"
+  },
+  "whitespace_handling": {
+    "problem": "Whitespace (spaces, tabs, newlines) is preserved by default",
+    "impact": "Can break URLs, deep links, and inline text",
+    "solution": "Use tildes (~) to trim whitespace",
+    "syntax": {
+      "remove_leading": "{{~tag}}",
+      "remove_trailing": "{{tag~}}",
+      "remove_both": "{{~tag~}}"
+    },
+    "example": {
+      "problem_code": "{{#if isSummer}}\n  https://example.com/summer\n{{else}}\n  https://example.com/winter\n{{/if}}",
+      "result": "URL has newlines/spaces (broken link)",
+      "solution": "{{~#if isSummer~}}https://example.com/summer{{~else~}}https://example.com/winter{{~/if~}}"
+    },
+    "use_cases": [
+      "Deep links",
+      "URLs",
+      "Inline conditional text",
+      "Compact output"
+    ]
+  },
+  "data_type_handling": {
+    "field_name_restrictions": {
+      "no_periods": {
+        "rule": "Don't use periods in field names",
+        "reason": "Handlebars uses periods for object notation",
+        "bad": "user.name, product.price",
+        "good": "userName, productPrice",
+        "reference": "https://support.iterable.com/hc/articles/26821896236948"
+      }
+    },
+    "comparison_operators": {
+      "rule": "Fields must be same data type for comparisons",
+      "valid": "Compare long to long, or double to double",
+      "invalid": "Comparing long to double may fail",
+      "solution": "Ensure fields are ingested as same numeric type"
+    },
+    "null_handling": {
+      "rule": "Always check for null/missing values before operations",
+      "math_operations": "{{#if totalSpent}}{{math totalSpent '+' 10}}{{else}}0{{/if}}",
+      "comparisons": "Use defaultIfEmpty or conditional checks",
+      "catalog_lookups": "Use required=false parameter"
+    }
+  }
+}
+

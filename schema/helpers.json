@@ -1,0 +1,2109 @@
+{
+  "conditional_logic": {
+    "defaultIfEmpty": {
+      "name": "defaultIfEmpty",
+      "category": "conditional_logic",
+      "syntax": "{{defaultIfEmpty field \"fallback\"}}",
+      "description": "Display a fallback value if a field is empty",
+      "parameters": [
+        {
+          "name": "field",
+          "type": "any",
+          "required": true,
+          "description": "Field to check"
+        },
+        {
+          "name": "fallback",
+          "type": "string",
+          "required": true,
+          "description": "Value to display if field is empty"
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{defaultIfEmpty firstName \"there\"}}",
+          "output": "there (if firstName is empty)",
+          "description": "Show fallback text when firstName is missing"
+        },
+        {
+          "code": "Hi {{defaultIfEmpty firstName \"Valued Customer\"}}!",
+          "output": "Hi Valued Customer! (if firstName is empty)",
+          "description": "Personalized greeting with fallback"
+        }
+      ],
+      "use_cases": [
+        "Personalized greetings with fallbacks",
+        "Handling missing user data",
+        "Preventing blank spaces in templates"
+      ],
+      "tags": ["fallback", "default", "conditional", "empty-check"]
+    },
+    "if": {
+      "name": "if",
+      "category": "conditional_logic",
+      "syntax": "{{#if field}}...{{else}}...{{/if}}",
+      "description": "Display content based on true/false values",
+      "parameters": [
+        {
+          "name": "condition",
+          "type": "boolean",
+          "required": true,
+          "description": "Condition to evaluate"
+        }
+      ],
+      "returns": "block",
+      "examples": [
+        {
+          "code": "{{#if activeUser}}\n  Welcome back!\n{{else}}\n  We miss you!\n{{/if}}",
+          "description": "Show different content based on user status"
+        },
+        {
+          "code": "{{#if firstName}}\n  Hi {{firstName}}!\n{{else}}\n  Hi there!\n{{/if}}",
+          "description": "Conditional greeting with fallback"
+        }
+      ],
+      "use_cases": [
+        "Conditional content display",
+        "Checking field existence",
+        "Personalization based on user attributes"
+      ],
+      "tags": ["conditional", "boolean", "block-helper"]
+    },
+    "unless": {
+      "name": "unless",
+      "category": "conditional_logic",
+      "syntax": "{{#unless field}}...{{/unless}}",
+      "description": "Display content if condition is false (inverse of if)",
+      "parameters": [
+        {
+          "name": "condition",
+          "type": "boolean",
+          "required": true,
+          "description": "Condition to evaluate (displays if false)"
+        }
+      ],
+      "returns": "block",
+      "examples": [
+        {
+          "code": "{{#unless activeUser}}\n  We miss you! Come back for 10% off.\n{{/unless}}",
+          "description": "Show content only if user is not active"
+        }
+      ],
+      "use_cases": [
+        "Inverse conditional display",
+        "Targeting inactive users",
+        "Default fallback content"
+      ],
+      "tags": ["conditional", "inverse", "block-helper"]
+    },
+    "and": {
+      "name": "and",
+      "category": "conditional_logic",
+      "syntax": "{{#and condition1 condition2}}...{{else}}...{{/and}}",
+      "description": "Logical AND operation on multiple fields",
+      "parameters": [
+        {
+          "name": "conditions",
+          "type": "boolean[]",
+          "required": true,
+          "description": "Multiple conditions to evaluate (all must be true)"
+        }
+      ],
+      "returns": "block",
+      "examples": [
+        {
+          "code": "{{#and optedIn completedSurvey}}\n  Thanks for completing the survey!\n{{else}}\n  Please complete our survey.\n{{/and}}",
+          "description": "Show content if both conditions are true"
+        }
+      ],
+      "use_cases": [
+        "Multiple condition checks",
+        "Complex eligibility logic",
+        "Combined user attribute filtering"
+      ],
+      "tags": ["logical", "and", "multiple-conditions", "block-helper"]
+    },
+    "or": {
+      "name": "or",
+      "category": "conditional_logic",
+      "syntax": "{{#or condition1 condition2}}...{{else}}...{{/or}}",
+      "description": "Logical OR operation on multiple fields",
+      "parameters": [
+        {
+          "name": "conditions",
+          "type": "boolean[]",
+          "required": true,
+          "description": "Multiple conditions to evaluate (any can be true)"
+        }
+      ],
+      "returns": "block",
+      "examples": [
+        {
+          "code": "{{#or likesCoffee likesTea}}\n  Craving a hot drink?\n{{else}}\n  Check out our cold beverages!\n{{/or}}",
+          "description": "Show content if either condition is true"
+        }
+      ],
+      "use_cases": [
+        "Alternative condition checks",
+        "Flexible eligibility",
+        "Broad targeting"
+      ],
+      "tags": ["logical", "or", "multiple-conditions", "block-helper"]
+    },
+    "not": {
+      "name": "not",
+      "category": "conditional_logic",
+      "syntax": "{{not condition yes=\"text\" no=\"text\"}}",
+      "description": "Logical NOT operation",
+      "parameters": [
+        {
+          "name": "condition",
+          "type": "boolean",
+          "required": true,
+          "description": "Condition to negate"
+        },
+        {
+          "name": "yes",
+          "type": "string",
+          "required": false,
+          "description": "Text to display if condition is false"
+        },
+        {
+          "name": "no",
+          "type": "string",
+          "required": false,
+          "description": "Text to display if condition is true"
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{not isAdult yes=\"Sorry, adults only\" no=\"Welcome!\"}}",
+          "description": "Inverse conditional inline output"
+        }
+      ],
+      "use_cases": [
+        "Inline inverse logic",
+        "Negating boolean fields"
+      ],
+      "tags": ["logical", "not", "inverse", "inline"]
+    },
+    "ifEq": {
+      "name": "ifEq",
+      "category": "conditional_logic",
+      "syntax": "{{#ifEq value1 value2}}...{{else}}...{{/ifEq}}",
+      "description": "Display content if two values are equal",
+      "parameters": [
+        {
+          "name": "value1",
+          "type": "any",
+          "required": true,
+          "description": "First value to compare"
+        },
+        {
+          "name": "value2",
+          "type": "any",
+          "required": true,
+          "description": "Second value to compare"
+        }
+      ],
+      "returns": "block",
+      "examples": [
+        {
+          "code": "{{#ifEq firstName preferredName}}\n  Hi, {{firstName}}!\n{{else}}\n  Hi, {{preferredName}}!\n{{/ifEq}}",
+          "description": "Compare two user fields for equality"
+        },
+        {
+          "code": "{{#ifEq loyaltyTier \"Gold\"}}\n  Welcome, Gold Member!\n{{/ifEq}}",
+          "description": "Check if field equals specific value"
+        }
+      ],
+      "use_cases": [
+        "Comparing field values",
+        "Tier-based personalization",
+        "Conditional messaging based on status"
+      ],
+      "common_errors": [
+        "Comparing different data types",
+        "Case-sensitive string comparison"
+      ],
+      "tags": ["comparison", "equality", "conditional", "block-helper"]
+    },
+    "ifNotEq": {
+      "name": "ifNotEq",
+      "category": "conditional_logic",
+      "syntax": "{{#ifNotEq value1 value2}}...{{/ifNotEq}}",
+      "description": "Display content if two values are NOT equal",
+      "parameters": [
+        {
+          "name": "value1",
+          "type": "any",
+          "required": true
+        },
+        {
+          "name": "value2",
+          "type": "any",
+          "required": true
+        }
+      ],
+      "returns": "block",
+      "examples": [
+        {
+          "code": "{{#ifNotEq status \"inactive\"}}\n  Your account is active!\n{{/ifNotEq}}",
+          "description": "Show content if status is not inactive"
+        }
+      ],
+      "use_cases": [
+        "Excluding specific values",
+        "Negative condition checks"
+      ],
+      "tags": ["comparison", "inequality", "conditional", "block-helper"]
+    },
+    "ifGt": {
+      "name": "ifGt",
+      "category": "conditional_logic",
+      "syntax": "{{#ifGt value1 value2}}...{{else}}...{{/ifGt}}",
+      "description": "Display content if value1 is greater than value2",
+      "parameters": [
+        {
+          "name": "value1",
+          "type": "number",
+          "required": true,
+          "description": "First value (must be numeric)"
+        },
+        {
+          "name": "value2",
+          "type": "number",
+          "required": true,
+          "description": "Second value (must be numeric)"
+        }
+      ],
+      "returns": "block",
+      "examples": [
+        {
+          "code": "{{#ifGt loyaltyPoints 100}}\n  You've reached VIP status!\n{{else}}\n  Keep earning points for VIP status.\n{{/ifGt}}",
+          "description": "Check if points exceed threshold"
+        },
+        {
+          "code": "{{#ifGt totalPurchases 1000}}\n  🌟 You're a top customer!\n{{/ifGt}}",
+          "description": "Display VIP content for high-value customers"
+        }
+      ],
+      "use_cases": [
+        "Threshold-based messaging",
+        "VIP/tier qualification",
+        "Purchase value checks"
+      ],
+      "common_errors": [
+        "Comparing non-numeric values",
+        "Fields with null values"
+      ],
+      "tags": ["comparison", "greater-than", "numeric", "conditional", "block-helper"]
+    },
+    "ifGte": {
+      "name": "ifGte",
+      "category": "conditional_logic",
+      "syntax": "{{#ifGte value1 value2}}...{{else}}...{{/ifGte}}",
+      "description": "Display content if value1 is greater than or equal to value2",
+      "parameters": [
+        {
+          "name": "value1",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "value2",
+          "type": "number",
+          "required": true
+        }
+      ],
+      "returns": "block",
+      "examples": [
+        {
+          "code": "{{#ifGte age 21}}\n  Check out our new French wines!\n{{else}}\n  Sorry, you must be 21+\n{{/ifGte}}",
+          "description": "Age verification check"
+        }
+      ],
+      "use_cases": [
+        "Age verification",
+        "Minimum threshold checks",
+        "Inclusive comparison"
+      ],
+      "tags": ["comparison", "greater-than-equal", "numeric", "conditional", "block-helper"]
+    },
+    "ifLt": {
+      "name": "ifLt",
+      "category": "conditional_logic",
+      "syntax": "{{#ifLt value1 value2}}...{{else}}...{{/ifLt}}",
+      "description": "Display content if value1 is less than value2",
+      "parameters": [
+        {
+          "name": "value1",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "value2",
+          "type": "number",
+          "required": true
+        }
+      ],
+      "returns": "block",
+      "examples": [
+        {
+          "code": "{{#ifLt purchases 5}}\n  Keep shopping to reach VIP status.\n{{else}}\n  Welcome to VIP!\n{{/ifLt}}",
+          "description": "Encourage more purchases"
+        }
+      ],
+      "use_cases": [
+        "Encouraging behavior",
+        "Progress tracking",
+        "Below threshold messaging"
+      ],
+      "tags": ["comparison", "less-than", "numeric", "conditional", "block-helper"]
+    },
+    "ifLte": {
+      "name": "ifLte",
+      "category": "conditional_logic",
+      "syntax": "{{#ifLte value1 value2}}...{{else}}...{{/ifLte}}",
+      "description": "Display content if value1 is less than or equal to value2",
+      "parameters": [
+        {
+          "name": "value1",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "value2",
+          "type": "number",
+          "required": true
+        }
+      ],
+      "returns": "block",
+      "examples": [
+        {
+          "code": "{{#ifLte age 17}}\n  Check out this summer's coolest kids' movies!\n{{else}}\n  Check out our adult features.\n{{/ifLte}}",
+          "description": "Age-based content filtering"
+        }
+      ],
+      "use_cases": [
+        "Maximum threshold checks",
+        "Age-based filtering",
+        "Inclusive less-than comparison"
+      ],
+      "tags": ["comparison", "less-than-equal", "numeric", "conditional", "block-helper"]
+    },
+    "ifModEq": {
+      "name": "ifModEq",
+      "category": "conditional_logic",
+      "syntax": "{{#ifModEq dividend divisor remainder}}...{{/ifModEq}}",
+      "description": "Display content if the remainder of division equals a value",
+      "parameters": [
+        {
+          "name": "dividend",
+          "type": "number",
+          "required": true,
+          "description": "Number to divide"
+        },
+        {
+          "name": "divisor",
+          "type": "number",
+          "required": true,
+          "description": "Number to divide by"
+        },
+        {
+          "name": "remainder",
+          "type": "number",
+          "required": true,
+          "description": "Expected remainder"
+        }
+      ],
+      "returns": "block",
+      "examples": [
+        {
+          "code": "{{#ifModEq daysSinceLastSend 30 0}}\n  New month, new featured recipe!\n{{/ifModEq}}",
+          "description": "Show content every 30 days"
+        },
+        {
+          "code": "{{#ifModEq orderId 2 0}}\n  Even order number!\n{{else}}\n  Odd order number!\n{{/ifModEq}}",
+          "description": "Check if number is even or odd"
+        }
+      ],
+      "use_cases": [
+        "Periodic messaging",
+        "Even/odd number checks",
+        "Rotation logic"
+      ],
+      "tags": ["comparison", "modulo", "remainder", "numeric", "conditional", "block-helper"]
+    },
+    "ifMatchesRegexStr": {
+      "name": "ifMatchesRegexStr",
+      "category": "conditional_logic",
+      "syntax": "{{#ifMatchesRegexStr string pattern}}...{{/ifMatchesRegexStr}}",
+      "description": "Display content if strings match a regular expression",
+      "parameters": [
+        {
+          "name": "string",
+          "type": "string",
+          "required": true,
+          "description": "String to test"
+        },
+        {
+          "name": "pattern",
+          "type": "string",
+          "required": true,
+          "description": "Regular expression pattern"
+        }
+      ],
+      "returns": "block",
+      "examples": [
+        {
+          "code": "{{#ifMatchesRegexStr dogName \"[Pp]ippin\"}}\n  Is your dog's name Pippin?\n{{/ifMatchesRegexStr}}",
+          "description": "Case-insensitive name matching"
+        },
+        {
+          "code": "{{#ifMatchesRegexStr email \".*@gmail\\\\.com$\"}}\n  Gmail user detected\n{{/ifMatchesRegexStr}}",
+          "description": "Email domain validation"
+        }
+      ],
+      "use_cases": [
+        "Pattern matching",
+        "Email validation",
+        "Custom field format checking"
+      ],
+      "tags": ["regex", "pattern", "string", "validation", "conditional", "block-helper"]
+    },
+    "ifContainsStr": {
+      "name": "ifContainsStr",
+      "category": "conditional_logic",
+      "syntax": "{{#ifContainsStr haystack needle}}...{{/ifContainsStr}}",
+      "description": "Display content if text is found within a string",
+      "parameters": [
+        {
+          "name": "haystack",
+          "type": "string",
+          "required": true,
+          "description": "String to search in"
+        },
+        {
+          "name": "needle",
+          "type": "string",
+          "required": true,
+          "description": "Text to search for"
+        }
+      ],
+      "returns": "block",
+      "examples": [
+        {
+          "code": "{{#ifContainsStr favoriteFoods \"blueberry\"}}\n  It's blueberry season!\n{{/ifContainsStr}}",
+          "description": "Check if substring exists"
+        },
+        {
+          "code": "{{#ifContainsStr interests \"running\"}}\n  Check out our new running shoes!\n{{/ifContainsStr}}",
+          "description": "Interest-based targeting"
+        }
+      ],
+      "use_cases": [
+        "Substring matching",
+        "Interest-based content",
+        "Category filtering"
+      ],
+      "tags": ["string", "substring", "contains", "search", "conditional", "block-helper"]
+    }
+  },
+  "date_time": {
+    "dateFormat": {
+      "name": "dateFormat",
+      "category": "date_time",
+      "syntax": "{{dateFormat field format=\"pattern\" tz=\"timezone\"}}",
+      "description": "Format dates in various ways",
+      "parameters": [
+        {
+          "name": "field",
+          "type": "date",
+          "required": true,
+          "description": "Date field to format"
+        },
+        {
+          "name": "format",
+          "type": "string",
+          "required": false,
+          "description": "Date format pattern (default: \"MMM dd, yyyy\")"
+        },
+        {
+          "name": "tz",
+          "type": "string",
+          "required": false,
+          "description": "Timezone (IANA format, e.g., America/Los_Angeles)"
+        },
+        {
+          "name": "locale",
+          "type": "string",
+          "required": false,
+          "description": "Locale for formatting (e.g., en_US, fr_FR)"
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{dateFormat signupDate format=\"full\"}}",
+          "output": "Wednesday, February 12, 2025",
+          "description": "Full date with day of week"
+        },
+        {
+          "code": "{{dateFormat signupDate format=\"long\"}}",
+          "output": "February 12, 2025",
+          "description": "Long date format"
+        },
+        {
+          "code": "{{dateFormat signupDate format=\"medium\"}}",
+          "output": "Feb 12, 2025",
+          "description": "Medium date format"
+        },
+        {
+          "code": "{{dateFormat signupDate format=\"short\"}}",
+          "output": "02/12/25",
+          "description": "Short date format"
+        },
+        {
+          "code": "{{dateFormat signupDate \"yyyy-MM-dd HH:mm:ss\"}}",
+          "output": "2025-02-12 13:45:30",
+          "description": "Custom pattern"
+        },
+        {
+          "code": "{{dateFormat signupDate \"long\" \"de_DE\"}}",
+          "output": "12. Februar 2025",
+          "description": "German locale"
+        },
+        {
+          "code": "{{dateFormat signupDate tz=\"America/Los_Angeles\"}}",
+          "output": "Feb 11, 2025 (adjusted to PST)",
+          "description": "Timezone conversion"
+        }
+      ],
+      "format_codes": {
+        "year": {
+          "y": "Year (2025)",
+          "yy": "Two-digit year (25)",
+          "yyyy": "Four-digit year (2025)"
+        },
+        "month": {
+          "M": "Month (4)",
+          "MM": "Two-digit month (04)",
+          "MMM": "Short month name (Apr)",
+          "MMMM": "Full month name (April)"
+        },
+        "day": {
+          "d": "Day (8)",
+          "dd": "Two-digit day (08)",
+          "D": "Day of year (98)",
+          "DD": "Two-digit day of year (98)",
+          "DDD": "Three-digit day of year (098)",
+          "e": "Day of week number (2 = Tuesday)",
+          "E": "Short day name (Tue)",
+          "EEEE": "Full day name (Tuesday)"
+        },
+        "time": {
+          "a": "AM/PM marker",
+          "h": "Clock hour 1-12 (12)",
+          "H": "Hour of day 0-23 (0)",
+          "k": "Clock hour 1-24 (16)",
+          "K": "Hour of half-day 0-11 (4)",
+          "m": "Minute of hour (30)",
+          "s": "Second of minute (55)",
+          "S": "Milliseconds (978)"
+        },
+        "timezone": {
+          "z": "Time zone name (PST)",
+          "Z": "Time zone offset (-0800)"
+        },
+        "week": {
+          "w": "Week of year (27)"
+        }
+      },
+      "use_cases": [
+        "Date localization",
+        "Timezone conversion",
+        "Custom date displays",
+        "Subscription/renewal reminders"
+      ],
+      "tags": ["date", "time", "format", "timezone", "locale"]
+    },
+    "dateMath": {
+      "name": "dateMath",
+      "category": "date_time",
+      "syntax": "{{dateMath date operation value unit}}",
+      "description": "Calculate dates relative to another date",
+      "parameters": [
+        {
+          "name": "date",
+          "type": "date|string",
+          "required": true,
+          "description": "Base date (or \"now\" for current date)"
+        },
+        {
+          "name": "operation",
+          "type": "string",
+          "required": true,
+          "description": "Operation: \"add\" or \"subtract\", or shorthand \"+7d\" or \"-1M\""
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "required": false,
+          "description": "Number to add/subtract (if not using shorthand)"
+        },
+        {
+          "name": "unit",
+          "type": "string",
+          "required": false,
+          "description": "Unit: years, months, days, hours, minutes, seconds"
+        }
+      ],
+      "returns": "date",
+      "examples": [
+        {
+          "code": "{{dateMath signupDate \"+7d\"}}",
+          "description": "Date 7 days after signup"
+        },
+        {
+          "code": "{{dateMath signupDate \"-1M\"}}",
+          "description": "Date 1 month before signup"
+        },
+        {
+          "code": "{{dateMath \"now\" \"-1d\"}}",
+          "description": "Yesterday's date"
+        },
+        {
+          "code": "{{dateMath signupDate \"add\" \"30\" \"days\"}}",
+          "description": "30 days after signup (long form)"
+        },
+        {
+          "code": "{{dateFormat (dateMath \"now\" \"+7d\") \"MMMM d, yyyy\"}}",
+          "output": "November 4, 2025",
+          "description": "Format a calculated date"
+        }
+      ],
+      "unit_codes": {
+        "y": "Years",
+        "M": "Months",
+        "d": "Days",
+        "H": "Hours",
+        "m": "Minutes",
+        "s": "Seconds"
+      },
+      "use_cases": [
+        "Trial expiration dates",
+        "Subscription renewals",
+        "Anniversary calculations",
+        "Countdown timers"
+      ],
+      "tags": ["date", "math", "calculation", "add", "subtract"]
+    },
+    "now": {
+      "name": "now",
+      "category": "date_time",
+      "syntax": "{{now format=\"pattern\"}}",
+      "description": "Display current date/time at send time",
+      "parameters": [
+        {
+          "name": "format",
+          "type": "string",
+          "required": false,
+          "description": "Date format pattern (default: \"MMM dd, yyyy\")"
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{now}}",
+          "output": "Oct 28, 2025",
+          "description": "Default format"
+        },
+        {
+          "code": "{{now format=\"yyyy\"}}",
+          "output": "2025",
+          "description": "Current year"
+        },
+        {
+          "code": "{{now format=\"EEEE\"}}",
+          "output": "Tuesday",
+          "description": "Current day of week"
+        },
+        {
+          "code": "{{now format=\"MMMM d, yyyy 'at' h:mm a\"}}",
+          "output": "October 28, 2025 at 3:45 PM",
+          "description": "Full datetime"
+        },
+        {
+          "code": "© {{now format=\"yyyy\"}} Company Name",
+          "output": "© 2025 Company Name",
+          "description": "Dynamic copyright year"
+        }
+      ],
+      "use_cases": [
+        "Dynamic copyright years",
+        "Current date display",
+        "Timestamp inclusion",
+        "Time-based greetings"
+      ],
+      "tags": ["date", "time", "current", "now", "timestamp"]
+    },
+    "timestamp": {
+      "name": "timestamp",
+      "category": "date_time",
+      "syntax": "{{timestamp}}",
+      "description": "Display Unix timestamp in milliseconds",
+      "parameters": [],
+      "returns": "number",
+      "examples": [
+        {
+          "code": "{{timestamp}}",
+          "output": "1730132260210",
+          "description": "Unix timestamp in milliseconds"
+        }
+      ],
+      "use_cases": [
+        "Unique identifiers",
+        "Cache busting",
+        "Tracking parameters"
+      ],
+      "tags": ["timestamp", "unix", "milliseconds"]
+    }
+  },
+  "math": {
+    "math": {
+      "name": "math",
+      "category": "math",
+      "syntax": "{{math value operator operand}}",
+      "description": "Perform mathematical operations",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "number",
+          "required": true,
+          "description": "First operand"
+        },
+        {
+          "name": "operator",
+          "type": "string",
+          "required": true,
+          "description": "Operator: '+', '-', '*', '/', '%'"
+        },
+        {
+          "name": "operand",
+          "type": "number",
+          "required": true,
+          "description": "Second operand"
+        }
+      ],
+      "returns": "number",
+      "examples": [
+        {
+          "code": "{{math age '+' 2}}",
+          "output": "32 (if age is 30)",
+          "description": "Addition"
+        },
+        {
+          "code": "{{math age '-' 2}}",
+          "output": "28 (if age is 30)",
+          "description": "Subtraction"
+        },
+        {
+          "code": "{{math age '*' 3}}",
+          "output": "90 (if age is 30)",
+          "description": "Multiplication"
+        },
+        {
+          "code": "{{math age '/' 2}}",
+          "output": "15 (if age is 30)",
+          "description": "Division"
+        },
+        {
+          "code": "{{math age '%' 17}}",
+          "output": "1 (if age is 35)",
+          "description": "Modulo (remainder)"
+        },
+        {
+          "code": "Earn {{math 1000 '-' loyaltyPoints}} more points for VIP!",
+          "description": "Calculate points needed"
+        }
+      ],
+      "use_cases": [
+        "Progress calculations",
+        "Discount computations",
+        "Points remaining",
+        "Price adjustments"
+      ],
+      "common_errors": [
+        "Operating on null values",
+        "Mixing data types (string vs number)"
+      ],
+      "tags": ["math", "arithmetic", "calculation", "numeric"]
+    },
+    "numberFormat": {
+      "name": "numberFormat",
+      "category": "math",
+      "syntax": "{{numberFormat value style locale options}}",
+      "description": "Format numbers as currency, percentage, or with custom precision",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "number",
+          "required": true,
+          "description": "Number to format"
+        },
+        {
+          "name": "style",
+          "type": "string",
+          "required": false,
+          "description": "Format style: \"currency\", \"percent\", \"decimal\", \"integer\""
+        },
+        {
+          "name": "locale",
+          "type": "string",
+          "required": false,
+          "description": "Locale for formatting (e.g., en_US, fr_FR)"
+        },
+        {
+          "name": "maximumFractionDigits",
+          "type": "number",
+          "required": false,
+          "description": "Maximum decimal places"
+        },
+        {
+          "name": "minimumFractionDigits",
+          "type": "number",
+          "required": false,
+          "description": "Minimum decimal places"
+        },
+        {
+          "name": "roundingMode",
+          "type": "string",
+          "required": false,
+          "description": "Rounding: up, down, ceiling, floor, half_up, half_down, half_even"
+        },
+        {
+          "name": "groupingUsed",
+          "type": "boolean",
+          "required": false,
+          "description": "Use thousands separator"
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{numberFormat price \"currency\" locale}}",
+          "output": "$29.99 (if locale is en_US)",
+          "description": "Currency formatting"
+        },
+        {
+          "code": "{{numberFormat price \"currency\" \"fr_FR\"}}",
+          "output": "29,99 € (if locale is fr_FR)",
+          "description": "French currency"
+        },
+        {
+          "code": "{{numberFormat completionLevel \"percent\"}}",
+          "output": "23% (if value is 0.23)",
+          "description": "Percentage formatting"
+        },
+        {
+          "code": "{{numberFormat height maximumFractionDigits=3}}",
+          "output": "178.079 (from 178.0787402)",
+          "description": "Control decimal places"
+        },
+        {
+          "code": "{{numberFormat revenue groupingUsed=true}}",
+          "output": "200,000,000",
+          "description": "Thousands separator"
+        },
+        {
+          "code": "{{numberFormat revenue \"#,###.00\"}}",
+          "output": "1,234.57",
+          "description": "Custom pattern"
+        }
+      ],
+      "use_cases": [
+        "Price display",
+        "Discount percentages",
+        "Currency localization",
+        "Progress indicators"
+      ],
+      "tags": ["number", "format", "currency", "percent", "decimal", "locale"]
+    },
+    "eq": {
+      "name": "eq",
+      "category": "math",
+      "syntax": "{{eq value1 value2 yes=\"text\" no=\"text\"}}",
+      "description": "Inline equality comparison",
+      "parameters": [
+        {
+          "name": "value1",
+          "type": "any",
+          "required": true
+        },
+        {
+          "name": "value2",
+          "type": "any",
+          "required": true
+        },
+        {
+          "name": "yes",
+          "type": "string",
+          "required": false,
+          "description": "Text if equal"
+        },
+        {
+          "name": "no",
+          "type": "string",
+          "required": false,
+          "description": "Text if not equal"
+        }
+      ],
+      "returns": "string|boolean",
+      "examples": [
+        {
+          "code": "{{eq value1 value2 yes=\"Equal\" no=\"Not equal\"}}",
+          "description": "Inline comparison with output"
+        }
+      ],
+      "tags": ["comparison", "equality", "inline"]
+    },
+    "gt": {
+      "name": "gt",
+      "category": "math",
+      "syntax": "{{gt value1 value2 yes=\"text\" no=\"text\"}}",
+      "description": "Inline greater-than comparison",
+      "parameters": [
+        {
+          "name": "value1",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "value2",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "yes",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "no",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "returns": "string|boolean",
+      "examples": [
+        {
+          "code": "{{gt value1 value2 yes=\"Greater\" no=\"Not greater\"}}",
+          "description": "Inline greater-than with output"
+        }
+      ],
+      "tags": ["comparison", "greater-than", "inline", "numeric"]
+    },
+    "gte": {
+      "name": "gte",
+      "category": "math",
+      "syntax": "{{gte value1 value2 yes=\"text\" no=\"text\"}}",
+      "description": "Inline greater-than-or-equal comparison",
+      "returns": "string|boolean",
+      "tags": ["comparison", "greater-than-equal", "inline", "numeric"]
+    },
+    "lt": {
+      "name": "lt",
+      "category": "math",
+      "syntax": "{{lt value1 value2 yes=\"text\" no=\"text\"}}",
+      "description": "Inline less-than comparison",
+      "returns": "string|boolean",
+      "tags": ["comparison", "less-than", "inline", "numeric"]
+    },
+    "lte": {
+      "name": "lte",
+      "category": "math",
+      "syntax": "{{lte value1 value2 yes=\"text\" no=\"text\"}}",
+      "description": "Inline less-than-or-equal comparison",
+      "returns": "string|boolean",
+      "tags": ["comparison", "less-than-equal", "inline", "numeric"]
+    }
+  },
+  "encoding_hashing": {
+    "base64": {
+      "name": "base64",
+      "category": "encoding_hashing",
+      "syntax": "{{#base64}}{{value}}{{/base64}}",
+      "description": "Encode value as Base64",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string",
+          "required": true,
+          "description": "Value to encode"
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{#base64}}{{email}}{{/base64}}",
+          "output": "dXNlckBleGFtcGxlLmNvbQ==",
+          "description": "Base64 encode email"
+        }
+      ],
+      "use_cases": [
+        "API authentication",
+        "Data encoding",
+        "URL parameters"
+      ],
+      "tags": ["encoding", "base64", "block-helper"]
+    },
+    "urlEncode": {
+      "name": "urlEncode",
+      "category": "encoding_hashing",
+      "syntax": "{{#urlEncode}}{{value}}{{/urlEncode}}",
+      "description": "URL-encode a value for safe use in URLs",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string",
+          "required": true,
+          "description": "Value to encode"
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{#urlEncode}}{{favoriteFood}}{{/urlEncode}}",
+          "input": "piña colada",
+          "output": "pi%C3%B1a+colada",
+          "description": "URL-encode special characters"
+        },
+        {
+          "code": "https://example.com/search?q={{#urlEncode}}{{searchTerm}}{{/urlEncode}}",
+          "description": "Safe URL parameter"
+        }
+      ],
+      "use_cases": [
+        "Query parameters",
+        "Deep links",
+        "API calls with user data"
+      ],
+      "tags": ["encoding", "url", "escape", "block-helper"]
+    },
+    "hexEncode": {
+      "name": "hexEncode",
+      "category": "encoding_hashing",
+      "syntax": "{{hexEncode value}}",
+      "description": "Encode value as hexadecimal",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{hexEncode email}}",
+          "output": "75736572406578616d706c652e636f6d",
+          "description": "Hex encode email"
+        }
+      ],
+      "use_cases": [
+        "Data encoding",
+        "Token generation"
+      ],
+      "tags": ["encoding", "hex", "hexadecimal"]
+    },
+    "toJson": {
+      "name": "toJson",
+      "category": "encoding_hashing",
+      "syntax": "{{toJson value}}",
+      "description": "Convert value to JSON string",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "any",
+          "required": true,
+          "description": "Value to convert"
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{toJson dataField}}",
+          "output": "\"value\" (for strings), 123 (for numbers), {\"key\":\"value\"} (for objects)",
+          "description": "Convert to JSON"
+        }
+      ],
+      "use_cases": [
+        "API payloads",
+        "Webhook data",
+        "Data serialization"
+      ],
+      "tags": ["encoding", "json", "serialization"]
+    },
+    "toUrlEncodedJson": {
+      "name": "toUrlEncodedJson",
+      "category": "encoding_hashing",
+      "syntax": "{{toUrlEncodedJson value}}",
+      "description": "Convert value to URL-encoded JSON string",
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{toUrlEncodedJson dataField}}",
+          "output": "%22value%22",
+          "description": "URL-encoded JSON"
+        }
+      ],
+      "use_cases": [
+        "URL query parameters with JSON",
+        "API calls"
+      ],
+      "tags": ["encoding", "json", "url", "serialization"]
+    },
+    "md5": {
+      "name": "md5",
+      "category": "encoding_hashing",
+      "syntax": "{{md5 value}}",
+      "description": "Generate MD5 hash (not recommended for security)",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{md5 email}}",
+          "output": "b58996c504c5638798eb6b511e6f49af",
+          "description": "MD5 hash of email"
+        }
+      ],
+      "security_warning": "MD5 is not cryptographically secure. Use SHA-256 or HMAC-SHA256 for security purposes.",
+      "use_cases": [
+        "Gravatar URLs",
+        "Legacy system integration"
+      ],
+      "tags": ["hashing", "md5", "legacy"]
+    },
+    "sha1": {
+      "name": "sha1",
+      "category": "encoding_hashing",
+      "syntax": "{{sha1 value}}",
+      "description": "Generate SHA-1 hash",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{sha1 email}}",
+          "output": "63a710569261a24b3766275b7000ce8d7b32e2f7",
+          "description": "SHA-1 hash"
+        }
+      ],
+      "use_cases": [
+        "Data fingerprinting",
+        "Legacy integrations"
+      ],
+      "tags": ["hashing", "sha1"]
+    },
+    "sha256": {
+      "name": "sha256",
+      "category": "encoding_hashing",
+      "syntax": "{{sha256 value}}",
+      "description": "Generate SHA-256 hash (secure)",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{sha256 email}}",
+          "output": "3a86c6f084291fda367f24e885c74d2f1d50419eb4028d2b1bb2060d8f45ce0b",
+          "description": "SHA-256 hash"
+        }
+      ],
+      "use_cases": [
+        "Secure hashing",
+        "Data integrity",
+        "User identifiers"
+      ],
+      "tags": ["hashing", "sha256", "secure"]
+    },
+    "hmacSHA1": {
+      "name": "hmacSHA1",
+      "category": "encoding_hashing",
+      "syntax": "{{hmacSHA1 value}}",
+      "description": "Generate HMAC-SHA1 hash with secret key",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{hmacSHA1 userId}}",
+          "output": "310cf1d869f57ad61fc46d45fc9496fa1a628162",
+          "description": "HMAC-SHA1 with secret"
+        }
+      ],
+      "use_cases": [
+        "API authentication",
+        "Secure tokens"
+      ],
+      "tags": ["hashing", "hmac", "sha1", "secure"]
+    },
+    "hmacSHA256": {
+      "name": "hmacSHA256",
+      "category": "encoding_hashing",
+      "syntax": "{{hmacSHA256 value}}",
+      "description": "Generate HMAC-SHA256 hash with secret key (most secure)",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{hmacSHA256 userId}}",
+          "output": "10ec54aa2d39e7ba838e3c485b46436d70c5f577f3df20f8ba8c5e7559d568dc",
+          "description": "HMAC-SHA256 with secret"
+        },
+        {
+          "code": "https://example.com/profile?token={{hmacSHA256 userId}}",
+          "description": "Secure profile link"
+        }
+      ],
+      "use_cases": [
+        "Secure authentication",
+        "API signatures",
+        "Profile verification links"
+      ],
+      "tags": ["hashing", "hmac", "sha256", "secure", "recommended"]
+    }
+  },
+  "text": {
+    "length": {
+      "name": "length",
+      "category": "text",
+      "syntax": "{{field.length}}",
+      "description": "Get string length",
+      "returns": "number",
+      "examples": [
+        {
+          "code": "{{favoriteBook.length}}",
+          "output": "21 (for \"To Kill A Mockingbird\")",
+          "description": "String length"
+        }
+      ],
+      "tags": ["string", "length", "count"]
+    },
+    "capitalize": {
+      "name": "capitalize",
+      "category": "text",
+      "syntax": "{{capitalize text}}",
+      "description": "Capitalize all words",
+      "parameters": [
+        {
+          "name": "text",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{capitalize text}}",
+          "input": "blueberry scone",
+          "output": "Blueberry Scone",
+          "description": "Capitalize each word"
+        }
+      ],
+      "use_cases": [
+        "Title case formatting",
+        "Name formatting"
+      ],
+      "tags": ["string", "capitalize", "case", "title-case"]
+    },
+    "capitalizeFirst": {
+      "name": "capitalizeFirst",
+      "category": "text",
+      "syntax": "{{capitalizeFirst text}}",
+      "description": "Capitalize only the first word",
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{capitalizeFirst text}}",
+          "input": "blueberry scone",
+          "output": "Blueberry scone",
+          "description": "Capitalize first word only"
+        }
+      ],
+      "use_cases": [
+        "Sentence case",
+        "Product names"
+      ],
+      "tags": ["string", "capitalize", "case", "sentence-case"]
+    },
+    "upper": {
+      "name": "upper",
+      "category": "text",
+      "syntax": "{{upper text}}",
+      "description": "Convert to uppercase",
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{upper text}}",
+          "input": "january",
+          "output": "JANUARY",
+          "description": "Uppercase conversion"
+        }
+      ],
+      "use_cases": [
+        "Emphasis",
+        "Headers",
+        "Code formatting"
+      ],
+      "tags": ["string", "uppercase", "case"]
+    },
+    "lower": {
+      "name": "lower",
+      "category": "text",
+      "syntax": "{{lower text}}",
+      "description": "Convert to lowercase",
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{lower text}}",
+          "input": "FItErAbLE",
+          "output": "fiterable",
+          "description": "Lowercase conversion"
+        }
+      ],
+      "use_cases": [
+        "Email normalization",
+        "Case-insensitive comparison"
+      ],
+      "tags": ["string", "lowercase", "case"]
+    },
+    "cut": {
+      "name": "cut",
+      "category": "text",
+      "syntax": "{{cut text substring}}",
+      "description": "Remove substring from text",
+      "parameters": [
+        {
+          "name": "text",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "substring",
+          "type": "string",
+          "required": true,
+          "description": "Text to remove"
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{cut breakfastOrder \"pan\"}}",
+          "input": "pancakes",
+          "output": "cakes",
+          "description": "Remove substring"
+        }
+      ],
+      "tags": ["string", "remove", "substring"]
+    },
+    "replace": {
+      "name": "replace",
+      "category": "text",
+      "syntax": "{{replace text old new}}",
+      "description": "Replace text substring",
+      "parameters": [
+        {
+          "name": "text",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "old",
+          "type": "string",
+          "required": true,
+          "description": "Text to find"
+        },
+        {
+          "name": "new",
+          "type": "string",
+          "required": true,
+          "description": "Replacement text"
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{replace text \"summer\" \"winter\"}}",
+          "input": "The cat days of summer",
+          "output": "The cat days of winter",
+          "description": "Replace substring"
+        }
+      ],
+      "use_cases": [
+        "Text substitution",
+        "Dynamic content"
+      ],
+      "tags": ["string", "replace", "substring"]
+    },
+    "abbreviate": {
+      "name": "abbreviate",
+      "category": "text",
+      "syntax": "{{abbreviate text length}}",
+      "description": "Truncate text with ellipsis",
+      "parameters": [
+        {
+          "name": "text",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "number",
+          "required": true,
+          "description": "Maximum length"
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{abbreviate iceCreamFlavor 7}}",
+          "input": "chocolate",
+          "output": "choc...",
+          "description": "Truncate with ellipsis"
+        }
+      ],
+      "use_cases": [
+        "Preview text",
+        "Character limits",
+        "Mobile display"
+      ],
+      "tags": ["string", "truncate", "abbreviate", "ellipsis"]
+    },
+    "center": {
+      "name": "center",
+      "category": "text",
+      "syntax": "{{center text size=length pad=\"char\"}}",
+      "description": "Center text with padding",
+      "parameters": [
+        {
+          "name": "text",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "size",
+          "type": "number",
+          "required": true,
+          "description": "Total width"
+        },
+        {
+          "name": "pad",
+          "type": "string",
+          "required": false,
+          "description": "Padding character (default: space)"
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{center greeting size=20 pad=\"-\"}}",
+          "input": "Hi there",
+          "output": "------Hi there------",
+          "description": "Center with dashes"
+        }
+      ],
+      "tags": ["string", "format", "center", "padding"]
+    },
+    "slugify": {
+      "name": "slugify",
+      "category": "text",
+      "syntax": "{{slugify text}}",
+      "description": "Convert text to URL-safe slug",
+      "parameters": [
+        {
+          "name": "text",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{slugify itemName}}",
+          "input": "lil' café milk frother 2.0",
+          "output": "lil-café-milk-frother-",
+          "description": "URL-safe slug"
+        }
+      ],
+      "use_cases": [
+        "URL generation",
+        "File names",
+        "IDs from text"
+      ],
+      "tags": ["string", "url", "slug", "normalize"]
+    },
+    "breaklines": {
+      "name": "breaklines",
+      "category": "text",
+      "syntax": "{{#breaklines}}{{text}}{{/breaklines}}",
+      "description": "Replace newlines with <br> tags",
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{#breaklines}}{{text}}{{/breaklines}}",
+          "description": "Convert newlines to HTML breaks"
+        }
+      ],
+      "tags": ["string", "html", "newline", "br", "block-helper"]
+    },
+    "substring": {
+      "name": "substring",
+      "category": "text",
+      "syntax": "{{substring text start end}}",
+      "description": "Extract substring",
+      "parameters": [
+        {
+          "name": "text",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "start",
+          "type": "number",
+          "required": true,
+          "description": "Start index (0-based)"
+        },
+        {
+          "name": "end",
+          "type": "number",
+          "required": true,
+          "description": "End index (exclusive)"
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{substring brand 3 6}}",
+          "input": "Fiterable",
+          "output": "era",
+          "description": "Extract characters 3-5"
+        }
+      ],
+      "tags": ["string", "substring", "extract", "slice"]
+    },
+    "join": {
+      "name": "join",
+      "category": "text",
+      "syntax": "{{join array delimiter}}",
+      "description": "Join array elements with delimiter",
+      "parameters": [
+        {
+          "name": "array",
+          "type": "array",
+          "required": true
+        },
+        {
+          "name": "delimiter",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{join sendListIds \",\"}}",
+          "output": "101,205,308",
+          "description": "Comma-separated list"
+        },
+        {
+          "code": "{{join tags \" | \"}}",
+          "output": "vip | subscriber | purchaser",
+          "description": "Pipe-separated tags"
+        }
+      ],
+      "use_cases": [
+        "Array to string",
+        "CSV generation",
+        "Tag lists"
+      ],
+      "tags": ["array", "join", "delimiter", "concatenate"]
+    },
+    "split": {
+      "name": "split",
+      "category": "text",
+      "syntax": "{{split string delimiter}}",
+      "description": "Split string into array",
+      "parameters": [
+        {
+          "name": "string",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "delimiter",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "returns": "array",
+      "examples": [
+        {
+          "code": "{{#each (split tags \",\")}}\n  {{this}}\n{{/each}}",
+          "description": "Split and iterate"
+        }
+      ],
+      "tags": ["string", "split", "array", "delimiter"]
+    },
+    "concat": {
+      "name": "concat",
+      "category": "text",
+      "syntax": "{{concat value1 value2 ...}}",
+      "description": "Concatenate multiple values",
+      "parameters": [
+        {
+          "name": "values",
+          "type": "string[]",
+          "required": true,
+          "description": "Values to concatenate"
+        }
+      ],
+      "returns": "string",
+      "examples": [
+        {
+          "code": "{{concat firstName \" \" lastName}}",
+          "output": "John Doe",
+          "description": "Join name parts"
+        },
+        {
+          "code": "{{assign \"fullName\" (concat firstName \" \" lastName)}}",
+          "description": "Store concatenated value"
+        }
+      ],
+      "use_cases": [
+        "Full name construction",
+        "Address formatting",
+        "String building"
+      ],
+      "tags": ["string", "concatenate", "join"]
+    }
+  },
+  "catalog": {
+    "catalog": {
+      "name": "catalog",
+      "category": "catalog",
+      "syntax": "{{#catalog \"catalogName\" itemId as |item|}}...{{else}}...{{/catalog}}",
+      "description": "Retrieve and use catalog data",
+      "parameters": [
+        {
+          "name": "catalogName",
+          "type": "string",
+          "required": true,
+          "description": "Name of the catalog"
+        },
+        {
+          "name": "itemId",
+          "type": "string|number",
+          "required": true,
+          "description": "ID of the item to retrieve"
+        },
+        {
+          "name": "required",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether item must exist (default: true)"
+        },
+        {
+          "name": "as",
+          "type": "string",
+          "required": true,
+          "description": "Variable name for the item"
+        }
+      ],
+      "returns": "block",
+      "examples": [
+        {
+          "code": "{{#catalog \"products\" productId as |product|}}\n  <h3>{{product.name}}</h3>\n  <p>{{product.description}}</p>\n  <span>{{numberFormat product.price \"currency\" locale}}</span>\n{{else}}\n  Product not found\n{{/catalog}}",
+          "description": "Display product from catalog"
+        },
+        {
+          "code": "{{#each recommendedProducts}}\n  {{#catalog \"products\" this as |product|}}\n    <div class=\"product-card\">\n      <img src=\"{{product.imageUrl}}\">\n      <h3>{{product.name}}</h3>\n      <p>{{numberFormat product.price \"currency\" locale}}</p>\n    </div>\n  {{/catalog}}\n{{/each}}",
+          "description": "Loop through recommendations"
+        }
+      ],
+      "use_cases": [
+        "Product recommendations",
+        "Dynamic content blocks",
+        "Personalized displays"
+      ],
+      "common_errors": [
+        "Catalog name mismatch",
+        "Item ID doesn't exist",
+        "Missing required parameter"
+      ],
+      "tags": ["catalog", "data", "lookup", "block-helper"]
+    }
+  },
+  "snippets": {
+    "snippet": {
+      "name": "snippet",
+      "category": "snippets",
+      "syntax": "{{{snippet \"snippetName\" param1=value1 param2=value2}}}",
+      "description": "Include reusable content block with parameters",
+      "parameters": [
+        {
+          "name": "snippetName",
+          "type": "string",
+          "required": true,
+          "description": "Name of the snippet"
+        },
+        {
+          "name": "parameters",
+          "type": "object",
+          "required": false,
+          "description": "Named parameters to pass to snippet"
+        }
+      ],
+      "returns": "html",
+      "important": "MUST use triple braces {{{snippet}}} not double braces",
+      "examples": [
+        {
+          "code": "{{{snippet \"header\"}}}",
+          "description": "Simple snippet inclusion"
+        },
+        {
+          "code": "{{{snippet \"promo_banner\" discount=20 ctaText=\"Shop Now\"}}}",
+          "description": "Snippet with parameters"
+        },
+        {
+          "code": "{{{snippet \"footer\" year=(now format=\"yyyy\")}}}",
+          "description": "Snippet with helper as parameter"
+        },
+        {
+          "code": "{{{snippet \"greeting\" name=(upper firstName)}}}",
+          "description": "Nested helper in snippet parameter"
+        }
+      ],
+      "use_cases": [
+        "Reusable headers/footers",
+        "Consistent branding",
+        "Complex logic centralization",
+        "Multi-template updates"
+      ],
+      "common_errors": [
+        "Using double braces {{snippet}} instead of triple {{{snippet}}}",
+        "Missing required parameters",
+        "Snippet name typo"
+      ],
+      "tags": ["snippet", "reusable", "template", "component"]
+    }
+  },
+  "advanced": {
+    "each": {
+      "name": "each",
+      "category": "advanced",
+      "syntax": "{{#each array}}...{{/each}}",
+      "description": "Loop over arrays and objects",
+      "parameters": [
+        {
+          "name": "array",
+          "type": "array|object",
+          "required": true,
+          "description": "Collection to iterate"
+        }
+      ],
+      "special_variables": {
+        "@index": "Current iteration index (0-based)",
+        "@key": "Current key (for objects)",
+        "@first": "True if first iteration",
+        "@last": "True if last iteration",
+        "this": "Current item"
+      },
+      "returns": "block",
+      "examples": [
+        {
+          "code": "{{#each shoppingCartItems}}\n  <li>{{this.name}} - ${{this.price}}</li>\n{{/each}}",
+          "description": "Loop through cart items"
+        },
+        {
+          "code": "{{#each items}}\n  {{@index}}: {{this.name}}\n{{/each}}",
+          "description": "Loop with index"
+        },
+        {
+          "code": "{{#each userProfile}}\n  {{@key}}: {{this}}\n{{/each}}",
+          "description": "Loop over object properties"
+        },
+        {
+          "code": "{{#each products}}\n  {{#if @first}}<ul>{{/if}}\n  <li>{{this.name}}</li>\n  {{#if @last}}</ul>{{/if}}\n{{/each}}",
+          "description": "Using @first and @last"
+        }
+      ],
+      "use_cases": [
+        "Product lists",
+        "Navigation menus",
+        "Dynamic tables",
+        "Tag lists"
+      ],
+      "tags": ["loop", "iteration", "array", "each", "block-helper"]
+    },
+    "lookup": {
+      "name": "lookup",
+      "category": "advanced",
+      "syntax": "{{lookup object key}}",
+      "description": "Dynamically access object properties",
+      "parameters": [
+        {
+          "name": "object",
+          "type": "object|array",
+          "required": true
+        },
+        {
+          "name": "key",
+          "type": "string|number",
+          "required": true,
+          "description": "Property name or array index"
+        }
+      ],
+      "returns": "any",
+      "examples": [
+        {
+          "code": "{{lookup userData fieldName}}",
+          "description": "Dynamic property access"
+        },
+        {
+          "code": "{{lookup shoppingCartItems 0}}",
+          "description": "Array index access"
+        }
+      ],
+      "use_cases": [
+        "Dynamic field access",
+        "Array indexing",
+        "Metadata lookups"
+      ],
+      "tags": ["lookup", "dynamic", "property", "access"]
+    },
+    "assign": {
+      "name": "assign",
+      "category": "advanced",
+      "syntax": "{{assign \"varName\" value}}",
+      "description": "Create temporary variables",
+      "parameters": [
+        {
+          "name": "varName",
+          "type": "string",
+          "required": true,
+          "description": "Variable name"
+        },
+        {
+          "name": "value",
+          "type": "any",
+          "required": true,
+          "description": "Value to assign"
+        }
+      ],
+      "returns": "void",
+      "examples": [
+        {
+          "code": "{{assign \"fullName\" (concat firstName \" \" lastName)}}\nHello, {{fullName}}!",
+          "description": "Store computed value"
+        },
+        {
+          "code": "{{assign \"discountedPrice\" (math price '*' 0.8)}}\nSale price: {{numberFormat discountedPrice \"currency\" locale}}",
+          "description": "Calculate and store discount"
+        }
+      ],
+      "use_cases": [
+        "Storing computed values",
+        "Simplifying complex expressions",
+        "Reusing calculations"
+      ],
+      "tags": ["variable", "assign", "storage", "temporary"]
+    },
+    "metadata": {
+      "name": "metadata",
+      "category": "advanced",
+      "syntax": "{{#metadata \"collection\" id as |item|}}...{{/metadata}}",
+      "description": "Access user metadata",
+      "parameters": [
+        {
+          "name": "collection",
+          "type": "string",
+          "required": true,
+          "description": "Metadata collection name"
+        },
+        {
+          "name": "id",
+          "type": "string",
+          "required": true,
+          "description": "Item ID"
+        },
+        {
+          "name": "as",
+          "type": "string",
+          "required": true,
+          "description": "Variable name"
+        }
+      ],
+      "returns": "block",
+      "examples": [
+        {
+          "code": "{{#metadata \"users\" userId as |user|}}\n  Email: {{user.email}}\n  Name: {{user.firstName}} {{user.lastName}}\n{{/metadata}}",
+          "description": "Access user metadata"
+        }
+      ],
+      "tags": ["metadata", "lookup", "block-helper"]
+    },
+    "with": {
+      "name": "with",
+      "category": "advanced",
+      "syntax": "{{#with object}}...{{/with}}",
+      "description": "Change context to nested object",
+      "parameters": [
+        {
+          "name": "object",
+          "type": "object",
+          "required": true
+        }
+      ],
+      "returns": "block",
+      "examples": [
+        {
+          "code": "{{#with user.profile}}\n  {{firstName}} {{lastName}}\n  {{address.city}}, {{address.state}}\n{{/with}}",
+          "description": "Simplified nested access"
+        }
+      ],
+      "tags": ["context", "scope", "nested", "block-helper"]
+    }
+  },
+  "arrays": {
+    "maxInList": {
+      "name": "maxInList",
+      "category": "arrays",
+      "syntax": "{{maxInList array}}",
+      "description": "Find maximum value in an array",
+      "returns": "number",
+      "examples": [
+        {
+          "code": "{{maxInList prices}}",
+          "description": "Highest price"
+        }
+      ],
+      "tags": ["array", "max", "maximum"]
+    },
+    "minInList": {
+      "name": "minInList",
+      "category": "arrays",
+      "syntax": "{{minInList array}}",
+      "description": "Find minimum value in an array",
+      "returns": "number",
+      "examples": [
+        {
+          "code": "{{minInList prices}}",
+          "description": "Lowest price"
+        }
+      ],
+      "tags": ["array", "min", "minimum"]
+    },
+    "inLeftNotInRight": {
+      "name": "inLeftNotInRight",
+      "category": "arrays",
+      "syntax": "{{inLeftNotInRight array1 array2}}",
+      "description": "Find items in first array but not in second",
+      "returns": "array",
+      "tags": ["array", "difference", "comparison"]
+    }
+  },
+  "special_urls": {
+    "smartOptInUrl": {
+      "name": "smartOptInUrl",
+      "category": "special_urls",
+      "syntax": "{{smartOptInUrl}}",
+      "description": "Generate smart opt-in URL",
+      "returns": "string",
+      "tags": ["url", "opt-in", "subscription"]
+    },
+    "unsubscribeByPhoneUrl": {
+      "name": "unsubscribeByPhoneUrl",
+      "category": "special_urls",
+      "syntax": "{{unsubscribeByPhoneUrl}}",
+      "description": "Generate unsubscribe by phone URL (for international SMS)",
+      "returns": "string",
+      "use_cases": [
+        "International SMS opt-out",
+        "Alphanumeric sender IDs"
+      ],
+      "tags": ["url", "unsubscribe", "sms", "phone"]
+    }
+  },
+  "data_control": {
+    "sendSkip": {
+      "name": "sendSkip",
+      "category": "data_control",
+      "syntax": "{{sendSkip cause=\"reason\" field1=value1}}",
+      "description": "Abort message send and log send skip event",
+      "parameters": [
+        {
+          "name": "cause",
+          "type": "string",
+          "required": false,
+          "description": "Reason for skipping"
+        },
+        {
+          "name": "additional_params",
+          "type": "object",
+          "required": false,
+          "description": "Named parameters to store with skip event"
+        }
+      ],
+      "returns": "void",
+      "examples": [
+        {
+          "code": "{{#ifLt creditAvailable product.price}}\n  {{sendSkip cause=\"insufficient credit\" creditAvailable=creditAvailable creditRequired=product.price}}\n{{/ifLt}}",
+          "description": "Skip send if insufficient credit"
+        },
+        {
+          "code": "{{#unless hasActiveSubscription}}\n  {{sendSkip cause=\"no active subscription\"}}\n{{/unless}}",
+          "description": "Skip for inactive subscribers"
+        }
+      ],
+      "use_cases": [
+        "Conditional send logic",
+        "Eligibility checks",
+        "Preventing unwanted sends"
+      ],
+      "important": "Must be used within conditional logic to prevent skipping all sends",
+      "tags": ["send", "skip", "abort", "conditional"]
+    }
+  }
+}
+

@@ -1,0 +1,427 @@
+{
+  "common_issues": {
+    "cannot_save_template": {
+      "issue": "Can't save template due to Handlebars error",
+      "cause": "Missing closing statements in Handlebars blocks",
+      "symptoms": [
+        "Error: Expecting 'CLOSE_RAW_BLOCK', got 'EOF'",
+        "Save button disabled or shows error"
+      ],
+      "solution": "Add all closing statements for block helpers",
+      "example": {
+        "broken": "{{#if isActiveUser}}\n  {{#if madePurchase}}\n    <div>Thank you!</div>\n{{/if}}",
+        "fixed": "{{#if isActiveUser}}\n  {{#if madePurchase}}\n    <div>Thank you!</div>\n  {{/if}}\n{{/if}}"
+      },
+      "prevention": "Use validation checklist before saving"
+    },
+    "handlebars_renders_as_html": {
+      "issue": "Template editor shows Handlebars code instead of executing it",
+      "cause": "WYSIWYG editor displays logic lines as content",
+      "solution": "Comment out logic lines with HTML comments",
+      "example": {
+        "before": "{{#if firstName}}\n  Hi, {{firstName}}!\n{{/if}}",
+        "after": "<!--{{#if firstName}}-->\n  Hi, {{firstName}}!\n<!--{{/if}}-->"
+      },
+      "important": "Only comment logic lines ({{#if}}, {{else}}, {{/if}}), NOT value lines like {{firstName}}"
+    },
+    "unexpected_characters": {
+      "issue": "Apostrophes render as &#x27;, quotes as &quot;",
+      "cause": "HTML escaping with double braces {{}}",
+      "symptoms": [
+        "\"Jenna's Elixir\" becomes \"Jenna&#x27;s Elixir\"",
+        "Special characters displayed as HTML entities"
+      ],
+      "solution": "Use triple braces {{{field}}} for HTML content",
+      "example": {
+        "escaped": "{{productName}} → Jenna&#x27;s Elixir",
+        "unescaped": "{{{productName}}} → Jenna's Elixir"
+      },
+      "security_warning": "Only use triple braces for trusted content you control"
+    },
+    "data_feed_not_rendering": {
+      "issue": "Data feed values not showing in template",
+      "possible_causes": [
+        {
+          "cause": "Merge context setting incorrect",
+          "check": "Is 'Merge the Data Feed and User Contexts' enabled?",
+          "solution_enabled": "Use {{field}} or [[field]]",
+          "solution_disabled": "Must use [[field]]"
+        },
+        {
+          "cause": "Data feed URL not configured",
+          "check": "Template settings → Data Feeds",
+          "solution": "Configure data feed URL and alias"
+        },
+        {
+          "cause": "Data feed returns no data",
+          "check": "Test data feed URL manually",
+          "solution": "Verify URL returns valid JSON"
+        },
+        {
+          "cause": "Field name mismatch",
+          "check": "Case-sensitive field names",
+          "solution": "Ensure exact match: [[productName]] not [[ProductName]]"
+        }
+      ],
+      "debugging": {
+        "test_if_loading": "{{#if [[feedData]]}}Loaded{{else}}Not loaded{{/if}}",
+        "check_syntax": "Merged: {{field}} or [[field]], Not merged: [[field]] only"
+      }
+    },
+    "blank_or_missing_values": {
+      "issue": "Referenced values don't appear in template",
+      "possible_causes": [
+        {
+          "cause": "Field names with spaces need brackets",
+          "wrong": "{{First Name}}",
+          "correct": "{{[First Name]}}",
+          "better": "Use firstName (no spaces)"
+        },
+        {
+          "cause": "Field doesn't exist on user profile",
+          "solution": "Add fallback: {{defaultIfEmpty field \"default\"}}"
+        },
+        {
+          "cause": "Null or undefined value",
+          "solution": "Use conditional: {{#if field}}{{field}}{{else}}fallback{{/if}}"
+        }
+      ]
+    },
+    "template_fails_to_render": {
+      "issue": "Template execution fails at send time",
+      "common_causes": [
+        {
+          "cause": "Missing required fields",
+          "solution": "Use defaultIfEmpty for critical fields",
+          "example": "{{defaultIfEmpty firstName \"there\"}}"
+        },
+        {
+          "cause": "Null values in comparisons",
+          "solution": "Check field exists before comparing",
+          "example": "{{#if totalSpent}}{{#ifGt totalSpent 100}}...{{/ifGt}}{{/if}}"
+        },
+        {
+          "cause": "Math operations on null/string",
+          "solution": "Validate numeric fields first",
+          "example": "{{#if age}}{{math age '+' 1}}{{/if}}"
+        },
+        {
+          "cause": "Catalog item doesn't exist",
+          "solution": "Use required=false parameter",
+          "example": "{{#catalog \"products\" id required=false as |product|}}...{{/catalog}}"
+        }
+      ],
+      "handlebars_execution_error": {
+        "event": "HandlebarsExecutionError send skip logged on user profile",
+        "common_triggers": [
+          "Comparison operators with null fields",
+          "Invalid catalog item IDs",
+          "Math operations on wrong data types",
+          "Missing required fields in blocks"
+        ],
+        "prevention": [
+          "Use defaultIfEmpty for critical fields",
+          "Add {{else}} blocks for fallbacks",
+          "Check field existence before operations",
+          "Use required=false in catalog helpers"
+        ]
+      }
+    },
+    "incorrect_date_display": {
+      "issue": "Date displays incorrectly or in wrong timezone",
+      "problems_and_solutions": [
+        {
+          "problem": "Wrong timezone",
+          "solution": "Add tz parameter",
+          "example": "{{dateFormat date tz=\"America/Los_Angeles\"}}"
+        },
+        {
+          "problem": "Wrong format",
+          "solution": "Specify format pattern",
+          "example": "{{dateFormat date format=\"yyyy-MM-dd\"}}"
+        },
+        {
+          "problem": "Date math not working",
+          "solution": "Ensure ISO 8601 format for dateMath",
+          "example": "{{dateMath (now) \"add\" \"7\" \"days\" format=\"yyyy-MM-dd\"}}"
+        }
+      ]
+    },
+    "catalog_items_not_showing": {
+      "issue": "Catalog lookups fail or show no results",
+      "causes_and_solutions": [
+        {
+          "cause": "Wrong catalog name",
+          "check": "Verify exact catalog name (case-sensitive)",
+          "solution": "Match catalog name exactly"
+        },
+        {
+          "cause": "Item ID doesn't exist",
+          "solution": "Use else block",
+          "example": "{{#catalog \"products\" id}}{{this.name}}{{else}}Not found{{/catalog}}"
+        },
+        {
+          "cause": "Required parameter issue",
+          "solution": "Use required=false for optional items",
+          "example": "{{#catalog \"products\" id required=false as |product|}}...{{/catalog}}"
+        }
+      ]
+    },
+    "math_operations_not_working": {
+      "issue": "Math operations fail or return unexpected results",
+      "causes_and_solutions": [
+        {
+          "cause": "Different data types",
+          "problem": "Comparing long to double",
+          "solution": "Ensure fields are same numeric type"
+        },
+        {
+          "cause": "Null or empty values",
+          "solution": "Check for null first",
+          "example": "{{#if totalSpent}}{{math totalSpent '+' 10}}{{else}}0{{/if}}"
+        },
+        {
+          "cause": "Wrong rounding mode",
+          "solution": "Specify rounding: up, down, half_even",
+          "example": "{{numberFormat value roundingMode=\"half_up\"}}"
+        }
+      ]
+    },
+    "html_not_rendering": {
+      "issue": "HTML shows as text instead of rendering",
+      "causes_and_solutions": [
+        {
+          "issue": "Snippets showing Handlebars code",
+          "wrong": "{{snippet \"header\"}}",
+          "correct": "{{{snippet \"header\"}}}",
+          "note": "Must use triple braces"
+        },
+        {
+          "issue": "HTML content showing as text",
+          "wrong": "{{htmlContent}} → &lt;b&gt;Bold&lt;/b&gt;",
+          "correct": "{{{htmlContent}}} → <b>Bold</b>"
+        },
+        {
+          "issue": "Data feed HTML escaped",
+          "escaped": "[[htmlField]] (shows HTML as text)",
+          "unescaped": "[[[htmlField]]] (renders HTML)"
+        }
+      ]
+    },
+    "whitespace_breaking_urls": {
+      "issue": "URLs have unwanted newlines/spaces, breaking links",
+      "cause": "Whitespace preserved by default in Handlebars",
+      "problem_example": "{{#if isSummer}}\n  https://example.com/summer\n{{else}}\n  https://example.com/winter\n{{/if}}",
+      "result": "URL contains newlines (broken link)",
+      "solution": "Use tildes (~) to remove whitespace",
+      "fixed_example": "{{~#if isSummer~}}https://example.com/summer{{~else~}}https://example.com/winter{{~/if~}}",
+      "use_in": [
+        "Deep links",
+        "URLs",
+        "API calls",
+        "Inline text"
+      ]
+    },
+    "journey_split_not_working": {
+      "issue": "Journey yes/no split not branching correctly",
+      "causes_and_solutions": [
+        {
+          "cause": "Event field missing",
+          "solution": "Verify triggering event includes field",
+          "check": "Event must contain: {{minimumOrderFromEvent}}"
+        },
+        {
+          "cause": "Field name mismatch",
+          "solution": "Check exact spelling (case-sensitive)",
+          "note": "{{minimumOrderFromEvent}} ≠ {{MinimumOrderFromEvent}}"
+        },
+        {
+          "cause": "Data type mismatch",
+          "solution": "Ensure types match (number vs string)",
+          "example": "Pass 100 not \"100\" for numeric comparison"
+        },
+        {
+          "cause": "Journey not triggered",
+          "solution": "Ensure journey is triggered (not scheduled)",
+          "note": "Event data only available in triggered journeys"
+        }
+      ]
+    },
+    "dynamic_list_not_filtering": {
+      "issue": "Dynamic list not filtering users correctly",
+      "causes_and_solutions": [
+        {
+          "cause": "List type is Static not Dynamic",
+          "solution": "Re-create list as Dynamic type"
+        },
+        {
+          "cause": "Field name doesn't match event field",
+          "solution": "Exact match required (case-sensitive)",
+          "example": "Query: {{emailDomainFromEvent}}, Event: \"emailDomainFromEvent\": \"example.com\""
+        },
+        {
+          "cause": "Event doesn't include field",
+          "solution": "Verify all fields passed in trigger",
+          "check": "Event JSON must contain all placeholder fields"
+        },
+        {
+          "cause": "Campaign is scheduled not triggered",
+          "solution": "Use with triggered campaigns/journeys only"
+        }
+      ]
+    }
+  },
+  "security_concerns": {
+    "xss_prevention": {
+      "issue": "Cross-Site Scripting (XSS) vulnerability",
+      "danger": "Using triple braces with user input",
+      "dangerous_code": "{{{userComment}}}",
+      "why_dangerous": "Allows script injection if user input contains <script> tags",
+      "safe_alternative": "{{userComment}}",
+      "test_input": "<script>alert('XSS')</script>",
+      "escaped_output": "&lt;script&gt;alert('XSS')&lt;/script&gt;",
+      "when_to_use_each": {
+        "use_double_braces": [
+          "User-generated content",
+          "Comments, reviews, feedback",
+          "Names, emails, addresses",
+          "Any untrusted data"
+        ],
+        "use_triple_braces": [
+          "Your own HTML content",
+          "Snippets (required)",
+          "Trusted CMS content",
+          "Pre-sanitized data"
+        ]
+      }
+    }
+  },
+  "debugging_tips": {
+    "test_with_preview": {
+      "tip": "Always use template preview with real user data",
+      "steps": [
+        "Select test user with various data scenarios",
+        "Test with missing fields",
+        "Test with null values",
+        "Test with edge cases (empty arrays, special characters)",
+        "Test multiple users with different profiles"
+      ]
+    },
+    "simplify_to_isolate": {
+      "tip": "Comment out sections to isolate issues",
+      "approach": [
+        "Comment out half the template",
+        "If error persists, issue is in other half",
+        "Continue dividing until issue isolated",
+        "Test Handlebars expressions one at a time"
+      ]
+    },
+    "check_data_types": {
+      "tip": "Verify field types match expectations",
+      "checks": [
+        "Numbers are actually numeric (not strings)",
+        "Dates are in correct format",
+        "Booleans are true/false (not \"true\"/\"false\")",
+        "Arrays are not null or empty"
+      ]
+    },
+    "use_fallbacks": {
+      "tip": "Always provide fallbacks for critical paths",
+      "patterns": [
+        "{{defaultIfEmpty field \"fallback\"}}",
+        "{{#if field}}{{field}}{{else}}default{{/if}}",
+        "{{#catalog \"name\" id required=false}}...{{else}}Not found{{/catalog}}"
+      ]
+    },
+    "check_iterable_documentation": {
+      "tip": "Verify helper syntax in official docs",
+      "when": [
+        "Helper not working as expected",
+        "Unsure of parameter order",
+        "Need to confirm parameter names"
+      ]
+    }
+  },
+  "data_priority": {
+    "understanding_data_sources": {
+      "description": "How Iterable prioritizes data when same field exists in multiple sources",
+      "priority_order": [
+        {
+          "rank": 1,
+          "source": "Triggering event data",
+          "priority": "Highest",
+          "note": "Event data overrides user profile data"
+        },
+        {
+          "rank": 2,
+          "source": "User profile data",
+          "priority": "Medium"
+        },
+        {
+          "rank": 3,
+          "source": "Data feed data",
+          "priority": "Lowest",
+          "note": "Only used if field not in event or profile (with merge contexts enabled)"
+        }
+      ],
+      "example": {
+        "field": "firstName",
+        "event_value": "John",
+        "profile_value": "Jane",
+        "datafeed_value": "Jim",
+        "result": "{{firstName}} displays \"John\" (event wins)"
+      }
+    }
+  },
+  "best_practices_for_reliability": {
+    "handle_missing_data": {
+      "principle": "Always assume fields might be missing",
+      "techniques": [
+        "Use defaultIfEmpty for simple fallbacks",
+        "Use {{#if field}} for conditional blocks",
+        "Provide {{else}} blocks for all conditionals",
+        "Test with users who have minimal data"
+      ]
+    },
+    "avoid_complex_nesting": {
+      "principle": "Deep nesting makes debugging difficult",
+      "recommendation": "Use snippets for complex logic",
+      "max_nesting": "3-4 levels maximum"
+    },
+    "test_edge_cases": {
+      "cases_to_test": [
+        "Brand new users with no data",
+        "Users with all fields populated",
+        "Users with special characters in names",
+        "Users with very long field values",
+        "Users with empty arrays",
+        "Users in different locales",
+        "Users in different timezones"
+      ]
+    },
+    "document_complex_logic": {
+      "technique": "Use HTML comments to explain logic",
+      "example": "<!-- Show VIP content only if user has 1000+ points and is active -->",
+      "benefit": "Easier maintenance and debugging"
+    }
+  },
+  "performance_tips": {
+    "cache_data_feeds": {
+      "setting": "Enable 'Cache data feed response' in template settings",
+      "benefit": "Reduces load on external servers",
+      "duration": "Up to 1 hour",
+      "note": "Caches per unique URL after parameter substitution"
+    },
+    "use_snippets": {
+      "benefit": "Reduces template complexity",
+      "advantage": "Single update affects multiple templates",
+      "performance": "Faster template compilation"
+    },
+    "minimize_catalog_lookups": {
+      "tip": "Batch catalog lookups when possible",
+      "avoid": "Multiple lookups for same item",
+      "pattern": "Store result in variable if needed multiple times"
+    }
+  }
+}
+

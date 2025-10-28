@@ -1,0 +1,545 @@
+{
+  "template_content": {
+    "email": {
+      "name": "Email Templates",
+      "handlebars_supported": true,
+      "locations": [
+        {
+          "field": "subject",
+          "description": "Email subject line",
+          "supports_snippets": true,
+          "syntax": "{{field}} or {{{snippet \"name\"}}}"
+        },
+        {
+          "field": "preheader",
+          "description": "Preheader text",
+          "supports_snippets": true
+        },
+        {
+          "field": "html_body",
+          "description": "HTML email body",
+          "supports_snippets": true,
+          "supports_data_feeds": true
+        },
+        {
+          "field": "plain_text_body",
+          "description": "Plain text email body",
+          "supports_snippets": true
+        },
+        {
+          "field": "from_name",
+          "description": "From name field",
+          "supports_snippets": false
+        },
+        {
+          "field": "reply_to",
+          "description": "Reply-to email address",
+          "supports_snippets": false
+        }
+      ],
+      "examples": [
+        {
+          "location": "subject",
+          "code": "Hi {{firstName}}, check out these deals!"
+        },
+        {
+          "location": "html_body",
+          "code": "<h1>Welcome {{firstName}} {{lastName}}</h1>\n<p>Your email: {{email}}</p>"
+        }
+      ],
+      "notes": [
+        "Most flexible Handlebars support",
+        "Data feeds require template configuration",
+        "Snippets use triple braces in subject lines"
+      ]
+    },
+    "sms": {
+      "name": "SMS Templates",
+      "handlebars_supported": true,
+      "locations": [
+        {
+          "field": "message_body",
+          "description": "SMS message content (text only)",
+          "supports_snippets": true,
+          "supports_data_feeds": false
+        }
+      ],
+      "examples": [
+        {
+          "location": "message_body",
+          "code": "Hi {{firstName}}! Your order #{{orderId}} has shipped. Track: {{trackingUrl}}"
+        }
+      ],
+      "notes": [
+        "Text only (no HTML)",
+        "Keep messages concise",
+        "URL encoding recommended"
+      ],
+      "character_limit": 160
+    },
+    "push": {
+      "name": "Push Notification Templates",
+      "handlebars_supported": true,
+      "string_conversion_in_json": true,
+      "locations": [
+        {
+          "field": "title",
+          "description": "Push notification title",
+          "supports_snippets": false,
+          "json_field": false
+        },
+        {
+          "field": "body",
+          "description": "Push notification body",
+          "supports_snippets": false,
+          "json_field": false
+        },
+        {
+          "field": "deep_link_url",
+          "description": "Deep link URL",
+          "supports_snippets": false,
+          "json_field": false
+        },
+        {
+          "field": "custom_payload",
+          "description": "Custom JSON payload",
+          "supports_snippets": false,
+          "json_field": true,
+          "string_conversion": true
+        }
+      ],
+      "examples": [
+        {
+          "location": "title",
+          "code": "{{firstName}}, you have {{cartItemCount}} items in your cart!"
+        },
+        {
+          "location": "custom_payload",
+          "code": "{\n  \"userId\": \"{{userId}}\",\n  \"campaignId\": \"{{campaignId}}\"\n}",
+          "note": "All values become strings"
+        }
+      ],
+      "notes": [
+        "Non-JSON fields support standard Handlebars",
+        "JSON payload fields are converted to strings",
+        "Deep links support dynamic parameters"
+      ]
+    },
+    "in_app": {
+      "name": "In-App Message Templates",
+      "handlebars_supported": true,
+      "string_conversion_in_json": true,
+      "locations": [
+        {
+          "field": "title",
+          "description": "Message title",
+          "supports_snippets": false
+        },
+        {
+          "field": "body",
+          "description": "Message body (HTML supported)",
+          "supports_snippets": true
+        },
+        {
+          "field": "button_text",
+          "description": "Button text",
+          "supports_snippets": false
+        },
+        {
+          "field": "image_url",
+          "description": "Image URL",
+          "supports_snippets": false
+        },
+        {
+          "field": "deep_link_url",
+          "description": "Deep link URL",
+          "supports_snippets": false
+        },
+        {
+          "field": "custom_payload",
+          "description": "Custom JSON payload",
+          "json_field": true,
+          "string_conversion": true
+        }
+      ],
+      "notes": [
+        "HTML supported in body field",
+        "JSON payload values converted to strings"
+      ]
+    },
+    "mobile_inbox": {
+      "name": "Mobile Inbox Templates",
+      "handlebars_supported": true,
+      "locations": [
+        {
+          "field": "title",
+          "description": "Inbox message title"
+        },
+        {
+          "field": "body",
+          "description": "Message body"
+        },
+        {
+          "field": "content",
+          "description": "Full message content"
+        },
+        {
+          "field": "button_text",
+          "description": "Button text"
+        },
+        {
+          "field": "image_url",
+          "description": "Image URL"
+        }
+      ]
+    },
+    "whatsapp": {
+      "name": "WhatsApp Templates",
+      "handlebars_supported": true,
+      "locations": [
+        {
+          "field": "message_body",
+          "description": "Message body content"
+        },
+        {
+          "field": "header_text",
+          "description": "Header text (if applicable)"
+        },
+        {
+          "field": "footer_text",
+          "description": "Footer text"
+        },
+        {
+          "field": "button_text",
+          "description": "Button text"
+        },
+        {
+          "field": "quick_reply_text",
+          "description": "Quick reply text"
+        },
+        {
+          "field": "template_variables",
+          "description": "Variable parameters in approved templates"
+        }
+      ],
+      "examples": [
+        {
+          "location": "message_body",
+          "code": "Hello {{firstName}}, your order {{orderId}} will arrive on {{deliveryDate}}."
+        }
+      ],
+      "notes": [
+        "Templates must be pre-approved by Meta",
+        "Variables substituted at send time",
+        "Template structure must match approved version"
+      ]
+    },
+    "embedded_messaging": {
+      "name": "Embedded Messaging (In-App via SDK)",
+      "handlebars_supported": true,
+      "string_conversion_in_json": true,
+      "locations": [
+        {
+          "field": "message_content",
+          "description": "HTML and text content"
+        },
+        {
+          "field": "button_text",
+          "description": "Button text"
+        },
+        {
+          "field": "button_url",
+          "description": "Button URL"
+        },
+        {
+          "field": "image_url",
+          "description": "Image URL"
+        },
+        {
+          "field": "custom_action_payload",
+          "description": "Custom action payloads",
+          "json_field": true,
+          "string_conversion": true
+        }
+      ],
+      "notes": [
+        "JSON custom payloads: all values become strings"
+      ]
+    }
+  },
+  "segmentation_and_targeting": {
+    "segmentation_filters": {
+      "name": "Segmentation Filters",
+      "handlebars_supported": true,
+      "description": "Use Handlebars expressions to create dynamic audience segments",
+      "examples": [
+        {
+          "code": "{{#ifGt totalPurchases 1000}}true{{else}}false{{/ifGt}}",
+          "description": "Complex conditional logic for segment membership"
+        },
+        {
+          "code": "{{#ifLt (dateMath signupDate \"add\" \"30\" \"days\") (now)}}true{{else}}false{{/ifGt}}",
+          "description": "Date-based segmentation (joined more than 30 days ago)"
+        }
+      ],
+      "use_cases": [
+        "Complex conditional logic",
+        "Date-based segmentation",
+        "Calculated fields from user data"
+      ]
+    },
+    "dynamic_lists": {
+      "name": "Dynamic Lists with Parameterized Queries",
+      "handlebars_supported": true,
+      "description": "Create dynamic lists with Handlebars placeholders populated from event data",
+      "requirements": [
+        "List must be saved as Dynamic List (not static)",
+        "Field names must match triggering event/API call fields",
+        "Must be used in triggered campaign or journey",
+        "Event or API call must include matching field"
+      ],
+      "examples": [
+        {
+          "query": "emailDomain equals {{emailDomainFromEvent}}",
+          "trigger_data": {
+            "emailDomainFromEvent": "example.com"
+          },
+          "result": "emailDomain equals \"example.com\"",
+          "description": "Filter by dynamic email domain"
+        },
+        {
+          "query": "state equals {{stateFromEvent}} AND city equals {{cityFromEvent}}",
+          "description": "Location-based targeting"
+        },
+        {
+          "query": "totalPurchases greaterThan {{minimumSpendFromEvent}}",
+          "description": "Purchase amount targeting"
+        }
+      ],
+      "use_cases": [
+        "Referral campaigns",
+        "Abandoned cart by category",
+        "Regional promotions",
+        "Tier-based offers",
+        "Time-sensitive campaigns"
+      ],
+      "best_practices": [
+        "Use descriptive field names: {{emailDomainFromEvent}}, {{categoryFromEvent}}",
+        "Test with actual event data",
+        "Document required event fields",
+        "Use consistent naming conventions"
+      ]
+    },
+    "journey_splits": {
+      "name": "Journey Yes/No Splits with Dynamic Conditions",
+      "handlebars_supported": true,
+      "description": "Dynamic branching logic based on event properties",
+      "requirements": [
+        "Must be used in a Journey (not standalone campaigns)",
+        "Journey must be triggered (not scheduled)",
+        "Field names must match event/API data fields",
+        "Event must include the matching field"
+      ],
+      "examples": [
+        {
+          "condition": "orderTotal greaterThan {{minimumOrderFromEvent}}",
+          "description": "Branch based on order value"
+        },
+        {
+          "condition": "loyaltyTier equals {{requiredTierFromEvent}}",
+          "description": "Membership tier split"
+        },
+        {
+          "condition": "state equals {{stateFromEvent}}",
+          "description": "Location-based split"
+        }
+      ],
+      "use_cases": [
+        "Dynamic discount qualification",
+        "Geographic targeting",
+        "Segment membership check",
+        "Product affinity",
+        "Engagement level filtering"
+      ]
+    },
+    "catalog_collections": {
+      "name": "Catalog Collections with Dynamic Queries",
+      "handlebars_supported": true,
+      "description": "Dynamically filter catalog items based on event data or data feed values",
+      "requirements": [
+        "Catalog must exist with queryable fields",
+        "Field names must match event/data feed fields (case-sensitive)",
+        "For event data: must be in triggered campaign/journey",
+        "For data feed: must enable 'Merge contexts'"
+      ],
+      "examples": [
+        {
+          "query": "category equals {{categoryFromEvent}} AND inStock equals true",
+          "description": "Filter by dynamic category from event"
+        },
+        {
+          "query": "brand equals {{preferredBrandFromEvent}} AND inStock equals true",
+          "description": "Brand-specific filtering"
+        },
+        {
+          "query": "category equals {{dataFeedCategory}} AND featured equals true",
+          "description": "Using data feed variables (requires merge contexts)"
+        }
+      ],
+      "use_cases": [
+        "Abandoned browse recovery",
+        "Similar items by category",
+        "Price-based recommendations",
+        "Location-based inventory",
+        "Seasonal campaign collections"
+      ]
+    }
+  },
+  "data_and_webhooks": {
+    "data_feed_urls": {
+      "name": "Data Feed URLs",
+      "handlebars_supported": true,
+      "description": "Create dynamic, personalized data feed URLs",
+      "supports_snippets": true,
+      "location": "Template Settings → Data Feeds → Data Feed URL",
+      "examples": [
+        {
+          "code": "https://api.example.com/recommendations?userId={{userId}}&category={{favoriteCategory}}&locale={{locale}}",
+          "description": "Personalized recommendation URL"
+        },
+        {
+          "code": "https://api.example.com/products/recommend?{{{snippet \"product-feed-params\"}}}",
+          "description": "Using snippet for complex URL building"
+        }
+      ],
+      "use_cases": [
+        "Personalized product recommendations",
+        "Location-based content",
+        "User-specific inventory",
+        "Dynamic pricing"
+      ],
+      "best_practices": [
+        "Always use {{urlEncode field}} for query parameters",
+        "Test URLs with actual user data",
+        "Use snippets for complex URL logic",
+        "Use HTTPS for all data feed URLs",
+        "Triple braces required for snippets: {{{snippet \"name\"}}}"
+      ]
+    },
+    "data_feed_headers": {
+      "name": "Data Feed HTTP Headers",
+      "handlebars_supported": true,
+      "description": "Dynamic HTTP headers for data feed requests",
+      "examples": [
+        {
+          "code": "Authorization: Bearer {{apiToken}}"
+        }
+      ]
+    },
+    "webhook_urls": {
+      "name": "Webhook URLs",
+      "handlebars_supported": true,
+      "description": "Pass dynamic parameters in webhook query strings",
+      "location": "Integrations → Webhooks → Webhook URL",
+      "examples": [
+        {
+          "code": "https://api.example.com/events?userId={{userId}}&email={{urlEncode email}}&eventType={{eventName}}"
+        },
+        {
+          "code": "https://tracking.example.com/webhook?campaignId={{campaignId}}&templateId={{templateId}}&timestamp={{now format=\"yyyy-MM-dd'T'HH:mm:ss\"}}"
+        }
+      ]
+    },
+    "webhook_json_body": {
+      "name": "Webhook JSON Body",
+      "handlebars_supported": true,
+      "string_conversion": true,
+      "description": "Handlebars in webhook JSON payload (all values become strings)",
+      "location": "Integrations → Webhooks → JSON Body",
+      "important_behavior": "All Handlebars values are automatically converted to strings, even numbers and booleans",
+      "examples": [
+        {
+          "code": "{\n  \"user\": {\n    \"email\": \"{{email}}\",\n    \"userId\": \"{{userId}}\",\n    \"isPremium\": \"{{isPremiumUser}}\"\n  },\n  \"campaign\": {\n    \"campaignId\": \"{{campaignId}}\",\n    \"sentAt\": \"{{now format='yyyy-MM-dd'T'HH:mm:ss'Z'}}\"\n  }\n}",
+          "note": "All values will be strings at runtime"
+        }
+      ],
+      "best_practices": [
+        "Always quote Handlebars references: \"field\": \"{{value}}\"",
+        "Document that receiving API must parse strings",
+        "Use toJson for complex objects",
+        "Use join helper for arrays: \"{{join array ','}}\"",
+        "Receiving API must convert strings to appropriate types"
+      ]
+    },
+    "webhook_headers": {
+      "name": "Webhook HTTP Headers",
+      "handlebars_supported": true,
+      "description": "Custom HTTP headers for webhooks",
+      "examples": [
+        {
+          "code": "X-User-ID: {{userId}}"
+        }
+      ]
+    }
+  },
+  "project_settings": {
+    "hosted_unsubscribe_url": {
+      "name": "Hosted Unsubscribe URL",
+      "handlebars_supported": true,
+      "description": "Dynamic hosted unsubscribe URLs with user information",
+      "location": "Project Settings → Subscription Settings → Hosted Unsubscribe URL",
+      "examples": [
+        {
+          "code": "https://example.com/preferences?email={{urlEncode email}}&userId={{urlEncode userId}}&listIds={{join emailListIds \",\"}}"
+        },
+        {
+          "code": "https://example.com/unsubscribe?email={{urlEncode email}}&campaignId={{campaignId}}&timestamp={{now format=\"yyyy-MM-dd\"}}"
+        }
+      ],
+      "use_in_templates": "{{hostedUnsubscribeUrl}}"
+    }
+  },
+  "template_previews": {
+    "name": "Template Previews and Validation",
+    "handlebars_supported": true,
+    "description": "Handlebars renders in preview mode for testing",
+    "notes": [
+      "Syntax validated before save",
+      "Preview with real user data recommended",
+      "Test edge cases (missing fields, nulls)"
+    ]
+  },
+  "quick_reference": {
+    "full_support": [
+      "Email (all fields)",
+      "SMS body",
+      "Push non-JSON fields",
+      "In-App non-JSON fields",
+      "Mobile Inbox",
+      "WhatsApp",
+      "Embedded Messaging content",
+      "Segmentation filters",
+      "Dynamic lists",
+      "Journey splits",
+      "Catalog collections",
+      "Data feed URLs (with snippets)",
+      "Webhook URLs",
+      "Hosted unsubscribe URL",
+      "Template previews"
+    ],
+    "string_conversion_contexts": [
+      "Webhook JSON body",
+      "Push custom payload",
+      "In-App custom payload",
+      "WhatsApp custom data",
+      "Embedded messaging custom actions"
+    ],
+    "no_snippet_support": [
+      "SMS body (snippets work, but no HTML rendering)",
+      "Push title/body/deep links",
+      "In-App title/button text/image URLs (body supports snippets)",
+      "URL parameters (snippets work in URLs, not as inline)"
+    ]
+  }
+}
+

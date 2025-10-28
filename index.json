@@ -1,0 +1,50 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2025-10-28",
+  "description": "AI-optimized Iterable Handlebars reference structured for efficient lookups",
+  "files": {
+    "helpers": "schema/helpers.json",
+    "contexts": "schema/contexts.json",
+    "validation_rules": "schema/validation-rules.json",
+    "common_patterns": "schema/common-patterns.json",
+    "troubleshooting": "schema/troubleshooting.json",
+    "universal_parameters": "schema/universal-parameters.json"
+  },
+  "categories": {
+    "conditional_logic": ["if", "unless", "and", "or", "not", "ifEq", "ifNotEq", "ifGt", "ifGte", "ifLt", "ifLte", "ifModEq", "ifMatchesRegexStr", "ifContainsStr"],
+    "date_time": ["dateFormat", "dateMath", "now", "timestamp", "timeZone"],
+    "math": ["math", "add", "subtract", "multiply", "divide", "numberFormat", "eq", "gt", "gte", "lt", "lte"],
+    "encoding_hashing": ["base64", "urlEncode", "hexEncode", "toJson", "toUrlEncodedJson", "md5", "sha1", "sha256", "hmacSHA1", "hmacSHA256"],
+    "text": ["capitalize", "capitalizeFirst", "upper", "lower", "cut", "replace", "abbreviate", "center", "slugify", "breaklines", "substring", "length"],
+    "catalog": ["catalog"],
+    "data_feeds": ["data_feed_syntax", "merged_context"],
+    "snippets": ["snippet"],
+    "advanced": ["each", "lookup", "assign", "metadata"],
+    "arrays": ["maxInList", "minInList", "inLeftNotInRight", "join"],
+    "urls": ["smartOptInUrl", "unsubscribeByPhoneUrl", "hostedUnsubscribeUrl", "unsubscribeUrl", "unsubscribeMessageTypeUrl", "viewInBrowserUrl"]
+  },
+  "quick_reference": {
+    "common_tasks": {
+      "personalization": "Use {{firstName}}, {{lastName}}, {{email}}",
+      "conditional_content": "Use {{#if}}, {{#ifEq}}, {{#ifGt}}",
+      "date_formatting": "Use {{dateFormat field format=\"yyyy-MM-dd\"}}",
+      "currency": "Use {{numberFormat price \"currency\" locale}}",
+      "fallbacks": "Use {{defaultIfEmpty field \"default\"}}",
+      "loops": "Use {{#each array}}...{{/each}}",
+      "catalog_lookup": "Use {{#catalog \"name\" id as |item|}}...{{/catalog}}",
+      "snippets": "Use {{{snippet \"name\" param=value}}}",
+      "logic_snippets": "Use snippets with {{assign}} for drag-and-drop grids - extract data to numbered variables (product1Name, product2Name, etc.)",
+      "grid_layouts": "Call logic snippet at top: {{{snippet \"data-prep\"}}}, then reference variables in static grid cells"
+    },
+    "syntax_rules": {
+      "double_braces": "{{field}} - Escapes HTML (safe for user input)",
+      "triple_braces": "{{{field}}} - Renders HTML (use for trusted content only)",
+      "block_helpers": "{{#helper}}...{{/helper}} - Must have closing tag",
+      "data_feeds": "[[field]] - Data feed syntax (or {{field}} with merged context)",
+      "snippets": "{{{snippet \"name\"}}} - Must use triple braces",
+      "comments": "<!-- {{comment}} --> - HTML comment syntax",
+      "whitespace": "{{~tag~}} - Remove whitespace with tildes"
+    }
+  }
+}
+
