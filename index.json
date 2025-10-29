@@ -8,7 +8,8 @@
     "validation_rules": "schema/validation-rules.json",
     "common_patterns": "schema/common-patterns.json",
     "troubleshooting": "schema/troubleshooting.json",
-    "universal_parameters": "schema/universal-parameters.json"
+    "universal_parameters": "schema/universal-parameters.json",
+    "reserved_fields": "schema/reserved-fields.json"
   },
   "categories": {
     "conditional_logic": ["if", "unless", "and", "or", "not", "ifEq", "ifNotEq", "ifGt", "ifGte", "ifLt", "ifLte", "ifModEq", "ifMatchesRegexStr", "ifContainsStr"],

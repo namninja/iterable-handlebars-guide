@@ -270,6 +270,139 @@
         }
       ]
     },
+    "reserved_field_name_conflicts": {
+      "issue": "Custom field not saving or behaving unexpectedly",
+      "reference": "See schema/reserved-fields.json for complete list",
+      "official_docs": "https://support.iterable.com/hc/en-us/articles/217744303-User-Profile-Fields-Used-by-Iterable",
+      "common_problems": [
+        {
+          "problem": "Custom 'ip' field won't save or gets overwritten",
+          "field_name": "ip",
+          "why_problematic": "'ip' is a reserved field managed by Iterable for storing user IP addresses",
+          "symptoms": [
+            "Field value doesn't persist",
+            "Field gets overwritten with user's actual IP",
+            "API returns success but field doesn't update"
+          ],
+          "solution": "Use a different field name",
+          "alternatives": ["companyIpAddress", "officeIp", "registeredIpAddress", "deviceIp"],
+          "example_fix": {
+            "wrong": {
+              "dataFields": {
+                "ip": "192.168.1.1"
+              }
+            },
+            "correct": {
+              "dataFields": {
+                "companyIpAddress": "192.168.1.1"
+              }
+            }
+          }
+        },
+        {
+          "problem": "emailListIds not updating via API",
+          "field_name": "emailListIds",
+          "why_problematic": "Managed by Iterable's subscription system, not user profile updates",
+          "wrong_approach": "Trying to set emailListIds in user update API",
+          "correct_approach": "Use Iterable's list subscription APIs",
+          "solution": {
+            "subscribe": "POST /api/lists/subscribe",
+            "unsubscribe": "POST /api/lists/unsubscribe"
+          }
+        },
+        {
+          "problem": "System fields changing unexpectedly",
+          "fields": ["lastSeenIp", "profileUpdatedAt", "createdAt"],
+          "why": "These are automatically managed by Iterable",
+          "solution": "Don't manually set these fields - let Iterable manage them"
+        },
+        {
+          "problem": "Field named 'userId' causing issues",
+          "field_name": "userId",
+          "why_problematic": "userId is a primary identifier - cannot be changed once set",
+          "symptoms": [
+            "Cannot update userId value",
+            "User updates fail",
+            "Duplicate user creation"
+          ],
+          "solution": "Use a different field for user-related IDs",
+          "alternatives": ["customUserId", "externalUserId", "accountId", "memberId"]
+        }
+      ],
+      "definitely_reserved": {
+        "description": "These field names MUST NOT be used for custom data",
+        "fields": [
+          "ip",
+          "email",
+          "userId",
+          "phoneNumber",
+          "emailListIds",
+          "unsubscribedChannelIds",
+          "unsubscribedMessageTypeIds",
+          "subscribedMessageTypeIds",
+          "itblInternal"
+        ],
+        "warning": "Using these for custom data will cause conflicts"
+      },
+      "system_managed": {
+        "description": "These are automatically updated by Iterable - do not set manually",
+        "fields": [
+          "createdAt",
+          "profileUpdatedAt",
+          "lastSeenIp",
+          "signupIp",
+          "campaignId",
+          "templateId",
+          "messageId"
+        ],
+        "warning": "Manual updates will be overwritten or cause unexpected behavior"
+      },
+      "checking_if_field_is_reserved": {
+        "steps": [
+          "Check schema/reserved-fields.json for complete list",
+          "Review official Iterable documentation",
+          "Test with a single user before bulk updates",
+          "Check API response for any field-related warnings"
+        ]
+      },
+      "best_practices": {
+        "field_naming": {
+          "use_descriptive_names": "firstName, lastName, preferredCategory",
+          "use_prefixes_to_avoid_conflicts": "custom_ip, user_segment, company_id",
+          "use_camelCase_or_snake_case": "totalPurchases or total_purchases",
+          "avoid": "Reserved names, generic names (id, type, status), special characters"
+        },
+        "before_creating_fields": [
+          "Check if field name is reserved",
+          "Document your field schema",
+          "Test with sample data first",
+          "Use consistent naming conventions"
+        ]
+      },
+      "troubleshooting_steps": [
+        "Identify which field is causing the issue",
+        "Check if field name appears in reserved fields list",
+        "If reserved, rename your custom field",
+        "Update API calls to use new field name",
+        "Update templates to reference new field name",
+        "Test thoroughly before production deployment"
+      ],
+      "real_world_example": {
+        "scenario": "Company wants to store office IP address",
+        "problem": "Created field named 'ip' which conflicts with system field",
+        "symptoms": "Field keeps getting overwritten with user's browser IP",
+        "solution_steps": [
+          "Rename field to 'officeIpAddress'",
+          "Update API integration to use new field name",
+          "Update templates: {{officeIpAddress}} instead of {{ip}}",
+          "Migrate existing data if any"
+        ],
+        "template_change": {
+          "before": "Office IP: {{ip}}",
+          "after": "Office IP: {{officeIpAddress}}"
+        }
+      }
+    },
     "api_datafields_syntax_confusion": {
       "issue": "API dataFields not rendering in template",
       "critical_distinction": "/campaigns/trigger uses {{}} | /campaigns/create uses [[]]",

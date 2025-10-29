@@ -1,0 +1,414 @@
+{
+  "description": "Iterable reserved and system-managed fields that should not be used for custom user data. These fields have special meaning and behavior within Iterable's platform.",
+  "reference_url": "https://support.iterable.com/hc/en-us/articles/217744303-User-Profile-Fields-Used-by-Iterable",
+  "overview": {
+    "what_are_reserved_fields": "Fields that Iterable uses for system functionality and should not be used for custom data",
+    "why_they_matter": "Using reserved field names for custom data can cause conflicts, data loss, or unexpected behavior",
+    "general_rule": "Do not use these field names for custom user profile data"
+  },
+  "required_identifiers": {
+    "description": "Every user must have at least one identifier",
+    "fields": {
+      "email": {
+        "name": "email",
+        "type": "string",
+        "required": "At least one identifier (email or userId) required",
+        "description": "User's email address - primary identifier for email campaigns",
+        "format": "Valid email address",
+        "example": "user@example.com",
+        "managed_by": "User/API",
+        "can_update": true,
+        "use_in_templates": "{{email}}"
+      },
+      "userId": {
+        "name": "userId",
+        "type": "string",
+        "required": "At least one identifier (email or userId) required",
+        "description": "Unique user identifier for API calls and cross-channel messaging",
+        "format": "String (alphanumeric, UUIDs, etc.)",
+        "example": "user_12345",
+        "managed_by": "User/API",
+        "can_update": false,
+        "note": "Cannot be changed once set",
+        "use_in_templates": "{{userId}}"
+      }
+    }
+  },
+  "contact_information": {
+    "description": "Contact-related reserved fields",
+    "fields": {
+      "phoneNumber": {
+        "name": "phoneNumber",
+        "type": "string",
+        "description": "User's mobile phone number for SMS messaging",
+        "format": "E.164 format recommended (e.g., +1234567890)",
+        "example": "+14155551234",
+        "managed_by": "User/API",
+        "can_update": true,
+        "use_in_templates": "{{phoneNumber}}"
+      }
+    }
+  },
+  "system_tracking_fields": {
+    "description": "System-managed fields for tracking and analytics",
+    "warning": "These are automatically managed by Iterable - do NOT manually set or update",
+    "fields": {
+      "ip": {
+        "name": "ip",
+        "type": "string",
+        "description": "User's IP address",
+        "managed_by": "Iterable (system)",
+        "can_update": false,
+        "auto_captured": true,
+        "captured_from": [
+          "Email opens",
+          "Link clicks",
+          "Web SDK events",
+          "Mobile SDK events"
+        ],
+        "critical_warning": "DO NOT use 'ip' as a custom field name - it is reserved",
+        "use_in_templates": "{{ip}}",
+        "common_mistake": "Creating a custom field named 'ip' - this will conflict with system field"
+      },
+      "lastSeenIp": {
+        "name": "lastSeenIp",
+        "type": "string",
+        "description": "IP address from user's most recent activity",
+        "managed_by": "Iterable (system)",
+        "can_update": false,
+        "auto_updated": true,
+        "use_in_templates": "{{lastSeenIp}}"
+      },
+      "signupIp": {
+        "name": "signupIp",
+        "type": "string",
+        "description": "IP address when user profile was created",
+        "managed_by": "Iterable (system)",
+        "can_update": false,
+        "captured_at": "User creation",
+        "use_in_templates": "{{signupIp}}"
+      }
+    }
+  },
+  "subscription_management": {
+    "description": "Fields that manage user subscription preferences",
+    "warning": "Managed by Iterable's subscription system - do not manually modify",
+    "fields": {
+      "emailListIds": {
+        "name": "emailListIds",
+        "type": "array of numbers",
+        "description": "List IDs the user is subscribed to (email)",
+        "managed_by": "Iterable (system)",
+        "can_update": false,
+        "updated_via": "Subscribe/unsubscribe API calls, list management",
+        "example": "[1001, 1002, 1003]",
+        "use_in_templates": "{{emailListIds}}",
+        "note": "Use Iterable's list subscription APIs instead of manual updates"
+      },
+      "unsubscribedChannelIds": {
+        "name": "unsubscribedChannelIds",
+        "type": "array of numbers",
+        "description": "Channel IDs user has unsubscribed from",
+        "managed_by": "Iterable (system)",
+        "can_update": false,
+        "updated_via": "Unsubscribe actions",
+        "use_in_templates": "{{unsubscribedChannelIds}}"
+      },
+      "unsubscribedMessageTypeIds": {
+        "name": "unsubscribedMessageTypeIds",
+        "type": "array of numbers",
+        "description": "Message type IDs user has unsubscribed from",
+        "managed_by": "Iterable (system)",
+        "can_update": false,
+        "updated_via": "Unsubscribe actions",
+        "use_in_templates": "{{unsubscribedMessageTypeIds}}"
+      },
+      "subscribedMessageTypeIds": {
+        "name": "subscribedMessageTypeIds",
+        "type": "array of numbers",
+        "description": "Message type IDs user is subscribed to",
+        "managed_by": "Iterable (system)",
+        "can_update": false,
+        "use_in_templates": "{{subscribedMessageTypeIds}}"
+      }
+    }
+  },
+  "metadata_fields": {
+    "description": "System metadata about user profiles",
+    "warning": "Automatically managed by Iterable",
+    "fields": {
+      "createdAt": {
+        "name": "createdAt",
+        "type": "timestamp",
+        "description": "When the user profile was created",
+        "managed_by": "Iterable (system)",
+        "can_update": false,
+        "format": "ISO 8601 timestamp",
+        "use_in_templates": "{{createdAt}}",
+        "example": "{{dateFormat createdAt \"MMMM d, yyyy\"}}"
+      },
+      "profileUpdatedAt": {
+        "name": "profileUpdatedAt",
+        "type": "timestamp",
+        "description": "Last time the user profile was updated",
+        "managed_by": "Iterable (system)",
+        "can_update": false,
+        "auto_updated": true,
+        "use_in_templates": "{{profileUpdatedAt}}"
+      },
+      "signupDate": {
+        "name": "signupDate",
+        "type": "date/timestamp",
+        "description": "Date when user signed up",
+        "managed_by": "User/API",
+        "can_update": true,
+        "note": "Can be set manually, but typically set at user creation",
+        "use_in_templates": "{{signupDate}}"
+      },
+      "signupSource": {
+        "name": "signupSource",
+        "type": "string",
+        "description": "Source/channel where user signed up",
+        "managed_by": "User/API",
+        "can_update": true,
+        "example": "website, mobile_app, referral",
+        "use_in_templates": "{{signupSource}}"
+      }
+    }
+  },
+  "campaign_and_message_fields": {
+    "description": "Fields related to campaigns and messages",
+    "warning": "These are context-specific and should not be stored in user profiles",
+    "fields": {
+      "campaignId": {
+        "name": "campaignId",
+        "type": "number",
+        "description": "ID of the campaign (available in template context)",
+        "managed_by": "Iterable (system)",
+        "can_update": false,
+        "context": "Available as universal parameter in templates",
+        "use_in_templates": "{{campaignId}}"
+      },
+      "templateId": {
+        "name": "templateId",
+        "type": "number",
+        "description": "ID of the template (available in template context)",
+        "managed_by": "Iterable (system)",
+        "can_update": false,
+        "use_in_templates": "{{templateId}}"
+      },
+      "messageId": {
+        "name": "messageId",
+        "type": "string",
+        "description": "Unique message identifier",
+        "managed_by": "Iterable (system)",
+        "can_update": false,
+        "use_in_templates": "{{messageId}}"
+      }
+    }
+  },
+  "mobile_and_api_fields": {
+    "description": "Fields used for mobile push and API behavior",
+    "fields": {
+      "mergeNestedObjects": {
+        "name": "mergeNestedObjects",
+        "type": "boolean",
+        "description": "Controls whether nested objects are merged or replaced on update",
+        "managed_by": "API parameter",
+        "can_update": true,
+        "default": false,
+        "use_case": "Set to true to merge nested objects instead of replacing them",
+        "note": "This is typically an API parameter, not a stored field"
+      },
+      "preferUserId": {
+        "name": "preferUserId",
+        "type": "boolean",
+        "description": "Prefer userId over email for identification",
+        "managed_by": "API parameter",
+        "can_update": true,
+        "use_case": "Email-based projects wanting to use userId",
+        "note": "This is typically an API parameter, not a stored field"
+      }
+    }
+  },
+  "internal_fields": {
+    "description": "Internal Iterable fields - never modify these",
+    "critical_warning": "DO NOT create, modify, or delete these fields",
+    "fields": {
+      "itblInternal": {
+        "name": "itblInternal",
+        "type": "object",
+        "description": "Internal Iterable data structure",
+        "managed_by": "Iterable (internal)",
+        "can_update": false,
+        "critical_warning": "Never modify this field - system use only",
+        "contains": "Internal tracking, attribution, and system data"
+      }
+    }
+  },
+  "best_practices": {
+    "dos": [
+      "Use email or userId as primary identifiers",
+      "Create custom fields with descriptive, non-reserved names",
+      "Use consistent naming conventions (camelCase or snake_case)",
+      "Document your custom field schema",
+      "Check reserved fields list before creating new fields",
+      "Use Iterable's APIs for subscription management"
+    ],
+    "donts": [
+      "Do NOT use reserved field names for custom data",
+      "Do NOT manually modify emailListIds or subscription fields",
+      "Do NOT modify itblInternal fields",
+      "Do NOT use 'ip' as a custom field name",
+      "Do NOT manually set system-managed fields (createdAt, profileUpdatedAt, lastSeenIp)",
+      "Do NOT use spaces or special characters in field names"
+    ]
+  },
+  "common_mistakes": {
+    "using_ip_as_custom_field": {
+      "mistake": "Creating a custom field named 'ip' for company or IP address data",
+      "problem": "Conflicts with Iterable's reserved 'ip' field",
+      "solution": "Use alternative names like 'companyIpAddress', 'officeIp', or 'registeredIp'",
+      "example": {
+        "wrong": {
+          "dataFields": {
+            "ip": "192.168.1.1"
+          }
+        },
+        "correct": {
+          "dataFields": {
+            "companyIpAddress": "192.168.1.1"
+          }
+        }
+      }
+    },
+    "manually_setting_list_ids": {
+      "mistake": "Manually setting emailListIds in user profile",
+      "problem": "Bypasses Iterable's subscription management system",
+      "solution": "Use Iterable's list subscription APIs instead",
+      "correct_approach": "Use /api/lists/subscribe or /api/lists/unsubscribe endpoints"
+    },
+    "overwriting_system_fields": {
+      "mistake": "Setting createdAt, lastSeenIp, or other system fields via API",
+      "problem": "Can break analytics, reporting, and system functionality",
+      "solution": "Let Iterable manage these fields automatically"
+    }
+  },
+  "field_naming_recommendations": {
+    "for_custom_data": {
+      "use": [
+        "Descriptive names: firstName, lastName, preferredCategory",
+        "camelCase or snake_case: totalPurchases or total_purchases",
+        "Prefixes to avoid conflicts: custom_ip, user_segment, company_id"
+      ],
+      "avoid": [
+        "Reserved field names",
+        "Generic names that might conflict: id, type, status (without prefix)",
+        "Special characters or spaces",
+        "System-sounding names: userId, campaignId (unless intentional)"
+      ]
+    }
+  },
+  "troubleshooting": {
+    "field_not_saving": {
+      "symptom": "Custom field value not persisting in user profile",
+      "possible_causes": [
+        "Field name is reserved (e.g., 'ip', 'emailListIds')",
+        "Field name conflicts with system field",
+        "Invalid field name format (special characters, spaces)"
+      ],
+      "solution": "Check reserved fields list and rename your custom field"
+    },
+    "unexpected_field_values": {
+      "symptom": "Field values changing unexpectedly",
+      "possible_causes": [
+        "Using reserved field that Iterable manages (e.g., 'lastSeenIp')",
+        "Field name conflicts with system field"
+      ],
+      "solution": "Use a different field name that's not reserved"
+    },
+    "subscription_issues": {
+      "symptom": "Subscription changes not working as expected",
+      "possible_causes": [
+        "Manually modifying emailListIds or subscription fields",
+        "Bypassing Iterable's subscription APIs"
+      ],
+      "solution": "Use Iterable's list subscription and message type subscription APIs"
+    }
+  },
+  "quick_reference": {
+    "definitely_reserved": [
+      "ip",
+      "email",
+      "userId",
+      "phoneNumber",
+      "emailListIds",
+      "unsubscribedChannelIds",
+      "unsubscribedMessageTypeIds",
+      "subscribedMessageTypeIds",
+      "itblInternal"
+    ],
+    "system_managed": [
+      "createdAt",
+      "profileUpdatedAt",
+      "lastSeenIp",
+      "signupIp",
+      "campaignId",
+      "templateId",
+      "messageId"
+    ],
+    "can_set_but_be_careful": [
+      "signupDate",
+      "signupSource"
+    ]
+  },
+  "accessing_in_templates": {
+    "user_profile_fields": {
+      "description": "Access reserved fields in templates like any other field",
+      "examples": [
+        {
+          "field": "email",
+          "code": "{{email}}",
+          "output": "user@example.com"
+        },
+        {
+          "field": "userId",
+          "code": "{{userId}}",
+          "output": "user_12345"
+        },
+        {
+          "field": "phoneNumber",
+          "code": "{{phoneNumber}}",
+          "output": "+14155551234"
+        },
+        {
+          "field": "ip",
+          "code": "{{ip}}",
+          "output": "192.168.1.1",
+          "note": "Rarely used in templates"
+        },
+        {
+          "field": "createdAt",
+          "code": "{{dateFormat createdAt \"MMMM d, yyyy\"}}",
+          "output": "January 15, 2024"
+        }
+      ]
+    },
+    "campaign_context_fields": {
+      "description": "These are available as universal parameters in templates",
+      "examples": [
+        {
+          "field": "campaignId",
+          "code": "{{campaignId}}",
+          "output": "12345"
+        },
+        {
+          "field": "templateId",
+          "code": "{{templateId}}",
+          "output": "67890"
+        }
+      ]
+    }
+  }
+}
+

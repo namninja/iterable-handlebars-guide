@@ -1,5 +1,161 @@
 # Changelog
 
+## 2025-10-28 - Reserved Fields Comprehensive Documentation
+
+### New Documentation: Iterable Reserved & System-Managed Fields
+
+Added complete documentation for all Iterable reserved fields to prevent custom field naming conflicts.
+
+#### What Was Added:
+
+**1. New File: `schema/reserved-fields.json` (~400 lines)**
+
+Complete reference for all reserved and system-managed fields in Iterable.
+
+**Sections included:**
+- **Required identifiers** - email, userId
+- **Contact information** - phoneNumber
+- **System tracking fields** - **ip** (the key one!), lastSeenIp, signupIp
+- **Subscription management** - emailListIds, unsubscribed fields
+- **Metadata fields** - createdAt, profileUpdatedAt, signupDate
+- **Campaign/message fields** - campaignId, templateId, messageId
+- **Mobile/API fields** - mergeNestedObjects, preferUserId
+- **Internal fields** - itblInternal (never modify!)
+
+**Key field documented: `ip`**
+```json
+{
+  "name": "ip",
+  "type": "string",
+  "description": "User's IP address",
+  "managed_by": "Iterable (system)",
+  "can_update": false,
+  "critical_warning": "DO NOT use 'ip' as a custom field name - it is reserved"
+}
+```
+
+**Features:**
+- Complete field descriptions
+- Whether field can be updated
+- Who manages each field
+- Template access examples
+- Auto-capture information
+- Best practices
+- Common mistakes with solutions
+- Field naming recommendations
+- Quick reference lists
+
+**2. Updated `index.json`**
+
+Added `reserved_fields` to files list for easy AI agent access.
+
+**3. New Troubleshooting Section in `schema/troubleshooting.json`**
+
+`reserved_field_name_conflicts` section with:
+- 4 common problems with detailed solutions
+- Focus on 'ip' field conflict (most common)
+- emailListIds management issues
+- System field overwrite problems
+- userId immutability issues
+
+**Problem 1: Custom 'ip' field won't save**
+```json
+// WRONG - conflicts with reserved field
+{
+  "dataFields": {
+    "ip": "192.168.1.1"
+  }
+}
+
+// CORRECT - use alternative name
+{
+  "dataFields": {
+    "companyIpAddress": "192.168.1.1"
+  }
+}
+```
+
+**Alternative field names suggested:**
+- companyIpAddress
+- officeIp
+- registeredIpAddress
+- deviceIp
+
+**Problem 2: emailListIds not updating**
+- Wrong: Trying to set via user update API
+- Correct: Use `/api/lists/subscribe` and `/api/lists/unsubscribe`
+
+**Includes:**
+- List of definitely reserved fields
+- List of system-managed fields
+- Field naming best practices
+- Troubleshooting steps
+- Real-world example with solution
+
+#### Why This is Critical:
+
+**The 'ip' field is a common gotcha:**
+1. Users want to store company/office IP addresses
+2. They name the field 'ip'
+3. Field gets overwritten with user's browser IP
+4. Causes confusion and data loss
+
+**Other common conflicts:**
+- userId (cannot be changed)
+- emailListIds (managed by subscription system)
+- System timestamp fields (auto-updated)
+
+#### Official Reference:
+
+All information based on: https://support.iterable.com/hc/en-us/articles/217744303-User-Profile-Fields-Used-by-Iterable
+
+#### Quick Reference Lists:
+
+**Definitely Reserved (DO NOT USE):**
+- ip
+- email
+- userId
+- phoneNumber
+- emailListIds
+- unsubscribedChannelIds
+- unsubscribedMessageTypeIds
+- subscribedMessageTypeIds
+- itblInternal
+
+**System-Managed (DO NOT MANUALLY SET):**
+- createdAt
+- profileUpdatedAt
+- lastSeenIp
+- signupIp
+- campaignId
+- templateId
+- messageId
+
+#### Files Modified:
+
+- `schema/reserved-fields.json` - NEW file (~400 lines)
+- `schema/troubleshooting.json` - Added reserved_field_name_conflicts (~130 lines)
+- `index.json` - Added reserved_fields to files list
+
+#### AI Agent Benefits:
+
+When users ask:
+- "Can I use 'ip' as a field name?"
+- "Why isn't my 'ip' field saving?"
+- "What fields are reserved in Iterable?"
+- "My emailListIds won't update"
+- "Can I change userId?"
+
+AI can now:
+✅ Check schema/reserved-fields.json
+✅ Warn about conflicts
+✅ Suggest alternative field names
+✅ Explain which fields are system-managed
+✅ Provide correct API approaches
+✅ Show real-world examples
+
+---
+
 ## 2025-10-28 - API Endpoints Documentation: Trigger vs. Create
 
 ### New Complete Documentation for Campaign APIs
