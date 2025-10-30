@@ -1915,8 +1915,8 @@
     "assign": {
       "name": "assign",
       "category": "advanced",
-      "syntax": "{{assign \"varName\" value}}",
-      "description": "Create temporary variables",
+      "syntax": "{{#assign \"varName\"}}value{{/assign}}",
+      "description": "Create temporary variables using block syntax",
       "parameters": [
         {
           "name": "varName",
@@ -1928,26 +1928,32 @@
           "name": "value",
           "type": "any",
           "required": true,
-          "description": "Value to assign"
+          "description": "Value to assign (placed between opening and closing tags)"
         }
       ],
       "returns": "void",
       "examples": [
         {
-          "code": "{{assign \"fullName\" (concat firstName \" \" lastName)}}\nHello, {{fullName}}!",
+          "code": "{{#assign \"fullName\"}}{{concat firstName \" \" lastName}}{{/assign}}\nHello, {{fullName}}!",
           "description": "Store computed value"
         },
         {
-          "code": "{{assign \"discountedPrice\" (math price '*' 0.8)}}\nSale price: {{numberFormat discountedPrice \"currency\" locale}}",
+          "code": "{{#assign \"discountedPrice\"}}{{math price '*' 0.8}}{{/assign}}\nSale price: {{numberFormat discountedPrice \"currency\" locale}}",
           "description": "Calculate and store discount"
+        },
+        {
+          "code": "{{#assign \"greeting\"}}Welcome back!{{/assign}}\n{{greeting}}",
+          "description": "Store static text"
         }
       ],
       "use_cases": [
         "Storing computed values",
         "Simplifying complex expressions",
-        "Reusing calculations"
+        "Reusing calculations",
+        "Creating reusable variables for templates"
       ],
-      "tags": ["variable", "assign", "storage", "temporary"]
+      "critical_note": "MUST use block syntax with opening {{#assign}} and closing {{/assign}} tags",
+      "tags": ["variable", "assign", "storage", "temporary", "block-helper"]
     },
     "metadata": {
       "name": "metadata",

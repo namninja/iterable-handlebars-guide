@@ -3715,10 +3715,10 @@ Dynamically access object properties.
 ---
 
 ### assign
-Create temporary variables.
+Create temporary variables using block syntax.
 
 ```handlebars
-{{assign "fullName" (concat firstName " " lastName)}}
+{{#assign "fullName"}}{{concat firstName " " lastName}}{{/assign}}
 Hello, {{fullName}}!
 ```
 

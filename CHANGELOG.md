@@ -17,22 +17,22 @@ Added dynamic collection sizing pattern that uses `collection.size` instead of h
 **❌ OLD APPROACH (Hardcoded):**
 ```handlebars
 {{!-- Assumes exactly 50 items --}}
-{{assign "video1Index" (math (modulo (timestamp) 10) "+" 20)}}
-{{assign "video2Index" (math (modulo (math (timestamp) "/" 100) 10) "+" 30)}}
-{{assign "video3Index" (math (modulo (math (timestamp) "/" 200) 10) "+" 40)}}
+{{#assign "video1Index"}}{{math (math (timestamp) "%" 10) "+" 20}}{{/assign}}
+{{#assign "video2Index"}}{{math (math (math (timestamp) "/" 100) "%" 10) "+" 30}}{{/assign}}
+{{#assign "video3Index"}}{{math (math (math (timestamp) "/" 200) "%" 10) "+" 40}}{{/assign}}
 ```
 **Problem:** Breaks if collection is 30, 80, or any size other than 50.
 
 **✅ NEW APPROACH (Dynamic):**
 ```handlebars
 {{!-- Works with ANY collection size --}}
-{{assign "collectionSize" collection.size}}
-{{assign "videosNeeded" 3}}
-{{assign "sectionSize" (math collectionSize "/" videosNeeded)}}
+{{#assign "collectionSize"}}{{collection.size}}{{/assign}}
+{{#assign "videosNeeded"}}3{{/assign}}
+{{#assign "sectionSize"}}{{math collectionSize "/" videosNeeded}}{{/assign}}
 
-{{assign "video1Index" (modulo (timestamp) sectionSize)}}
-{{assign "video2Index" (math (modulo (math (timestamp) "/" 100) sectionSize) "+" sectionSize)}}
-{{assign "video3Index" (math (modulo (math (timestamp) "/" 200) sectionSize) "+" (math sectionSize "*" 2))}}
+{{#assign "video1Index"}}{{math (timestamp) "%" sectionSize}}{{/assign}}
+{{#assign "video2Index"}}{{math (math (math (timestamp) "/" 100) "%" sectionSize) "+" sectionSize}}{{/assign}}
+{{#assign "video3Index"}}{{math (math (math (timestamp) "/" 200) "%" sectionSize) "+" (math sectionSize "*" 2))}}{{/assign}}
 ```
 **Benefit:** Works automatically with 30, 50, 100, or ANY number of items!
 
@@ -54,10 +54,10 @@ Added dynamic collection sizing pattern that uses `collection.size` instead of h
 - Scales with collection size
 
 ```handlebars
-{{assign "collectionSize" collection.size}}
-{{assign "skipAmount" (math collectionSize "*" 0.4)}}
-{{assign "remainingSize" (math collectionSize "-" skipAmount)}}
-{{assign "sectionSize" (math remainingSize "/" 3)}}
+{{#assign "collectionSize"}}{{collection.size}}{{/assign}}
+{{#assign "skipAmount"}}{{math collectionSize "*" 0.4}}{{/assign}}
+{{#assign "remainingSize"}}{{math collectionSize "-" skipAmount}}{{/assign}}
+{{#assign "sectionSize"}}{{math remainingSize "/" 3}}{{/assign}}
 ```
 
 **Examples:**
@@ -70,10 +70,10 @@ Added dynamic collection sizing pattern that uses `collection.size` instead of h
 - Dynamically divide remaining items
 
 ```handlebars
-{{assign "collectionSize" collection.size}}
-{{assign "skipAmount" 20}}
-{{assign "remainingSize" (math collectionSize "-" 20)}}
-{{assign "sectionSize" (math remainingSize "/" 3)}}
+{{#assign "collectionSize"}}{{collection.size}}{{/assign}}
+{{#assign "skipAmount"}}20{{/assign}}
+{{#assign "remainingSize"}}{{math collectionSize "-" 20}}{{/assign}}
+{{#assign "sectionSize"}}{{math remainingSize "/" 3}}{{/assign}}
 ```
 
 **Examples:**
@@ -94,8 +94,8 @@ Added dynamic collection sizing pattern that uses `collection.size` instead of h
 
 | Approach | Example | Problem | When to Use |
 |----------|---------|---------|-------------|
-| **Hardcoded** | `{{assign "video1Index" (math (modulo (timestamp) 10) "+" 20)}}` | Assumes exactly 50 items, breaks if collection is 30 or 80 | ONLY if collection size is always fixed |
-| **Dynamic** | `{{assign "sectionSize" (math collection.size "/" 3)}}` | None - works with any size | ALWAYS prefer this unless specific reason not to |
+| **Hardcoded** | `{{#assign "video1Index"}}{{math (math (timestamp) "%" 10) "+" 20}}{{/assign}}` | Assumes exactly 50 items, breaks if collection is 30 or 80 | ONLY if collection size is always fixed |
+| **Dynamic** | `{{#assign "sectionSize"}}{{math collection.size "/" 3}}{{/assign}}` | None - works with any size | ALWAYS prefer this unless specific reason not to |
 
 #### Complete Copy-Paste Example:
 
@@ -105,21 +105,21 @@ Added dynamic collection sizing pattern that uses `collection.size` instead of h
 {{#catalogCollection "RecommendedVideos" as |collection|}}
   
   {{!-- Get collection size --}}
-  {{assign "collectionSize" collection.size}}
+  {{#assign "collectionSize"}}{{collection.size}}{{/assign}}
   
   {{!-- Skip first 20 items (fixed) --}}
-  {{assign "skipAmount" 20}}
+  {{#assign "skipAmount"}}20{{/assign}}
   
   {{!-- Remaining collection size --}}
-  {{assign "remainingSize" (math collectionSize "-" skipAmount)}}
+  {{#assign "remainingSize"}}{{math collectionSize "-" skipAmount}}{{/assign}}
   
   {{!-- Section size from remaining items --}}
-  {{assign "sectionSize" (math remainingSize "/" 3)}}
+  {{#assign "sectionSize"}}{{math remainingSize "/" 3}}{{/assign}}
   
   {{!-- Calculate pseudo-random offsets starting at item 20 --}}
-  {{assign "video1Index" (math (modulo (timestamp) sectionSize) "+" 20)}}
-  {{assign "video2Index" (math (math (modulo (math (timestamp) "/" 100) sectionSize) "+" sectionSize) "+" 20)}}
-  {{assign "video3Index" (math (math (modulo (math (timestamp) "/" 200) sectionSize) "+" (math sectionSize "*" 2)) "+" 20)}}
+  {{#assign "video1Index"}}{{math (math (timestamp) "%" sectionSize) "+" 20}}{{/assign}}
+  {{#assign "video2Index"}}{{math (math (math (math (timestamp) "/" 100) "%" sectionSize) "+" sectionSize) "+" 20}}{{/assign}}
+  {{#assign "video3Index"}}{{math (math (math (math (timestamp) "/" 200) "%" sectionSize) "+" (math sectionSize "*" 2)) "+" 20}}{{/assign}}
   
   <div class="video-recommendations">
     {{#each collection}}
@@ -213,9 +213,9 @@ Added comprehensive documentation for selecting pseudo-random items from catalog
   {{!-- Section 3: items 34-49 (16 items) --}}
   
   {{!-- Calculate pseudo-random index for each section --}}
-  {{assign "video1Index" (modulo (timestamp) 17)}}
-  {{assign "video2Index" (math (modulo (math (timestamp) "/" 137) 17) "+" 17)}}
-  {{assign "video3Index" (math (modulo (math (timestamp) "/" 251) 16) "+" 34)}}
+  {{#assign "video1Index"}}{{math (timestamp) "%" 17}}{{/assign}}
+  {{#assign "video2Index"}}{{math (math (math (timestamp) "/" 137) "%" 17) "+" 17}}{{/assign}}
+  {{#assign "video3Index"}}{{math (math (math (timestamp) "/" 251) "%" 16) "+" 34}}{{/assign}}
   
   {{!-- Loop through collection and display selected items --}}
   <div class="video-recommendations">
