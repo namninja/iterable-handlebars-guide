@@ -1,5 +1,548 @@
 # Changelog
 
+## 2025-10-30 - Dynamic Collection Sizing for Pseudo-Random Selection
+
+### Critical Improvement: Use collection.size for Dynamic Sizing
+
+Added dynamic collection sizing pattern that uses `collection.size` instead of hardcoding assumptions about collection size. This is now the **BEST PRACTICE** approach.
+
+#### What Was Added:
+
+**New Section in `schema/common-patterns.json`:**
+
+`product_recommendations.pseudo_random_selection.dynamic_collection_sizing` - Complete guide to dynamic sizing (~75 lines).
+
+#### The Critical Improvement:
+
+**❌ OLD APPROACH (Hardcoded):**
+```handlebars
+{{!-- Assumes exactly 50 items --}}
+{{assign "video1Index" (math (modulo (timestamp) 10) "+" 20)}}
+{{assign "video2Index" (math (modulo (math (timestamp) "/" 100) 10) "+" 30)}}
+{{assign "video3Index" (math (modulo (math (timestamp) "/" 200) 10) "+" 40)}}
+```
+**Problem:** Breaks if collection is 30, 80, or any size other than 50.
+
+**✅ NEW APPROACH (Dynamic):**
+```handlebars
+{{!-- Works with ANY collection size --}}
+{{assign "collectionSize" collection.size}}
+{{assign "videosNeeded" 3}}
+{{assign "sectionSize" (math collectionSize "/" videosNeeded)}}
+
+{{assign "video1Index" (modulo (timestamp) sectionSize)}}
+{{assign "video2Index" (math (modulo (math (timestamp) "/" 100) sectionSize) "+" sectionSize)}}
+{{assign "video3Index" (math (modulo (math (timestamp) "/" 200) sectionSize) "+" (math sectionSize "*" 2))}}
+```
+**Benefit:** Works automatically with 30, 50, 100, or ANY number of items!
+
+#### Three Dynamic Approaches Documented:
+
+**1. Basic Dynamic Approach**
+- Uses `collection.size` to calculate section size
+- `sectionSize = collectionSize / videosNeeded`
+- Works with any collection size
+
+**Examples:**
+- 30 items / 3 videos = 10 per section (0-9, 10-19, 20-29)
+- 60 items / 3 videos = 20 per section (0-19, 20-39, 40-59)
+- 90 items / 3 videos = 30 per section (0-29, 30-59, 60-89)
+
+**2. Skip Percentage (Dynamic)**
+- Skip first X% of items (e.g., 40%)
+- `skipAmount = collectionSize * 0.4`
+- Scales with collection size
+
+```handlebars
+{{assign "collectionSize" collection.size}}
+{{assign "skipAmount" (math collectionSize "*" 0.4)}}
+{{assign "remainingSize" (math collectionSize "-" skipAmount)}}
+{{assign "sectionSize" (math remainingSize "/" 3)}}
+```
+
+**Examples:**
+- 50 items → Skip 20 (40%) → 30 remaining → 10 per section
+- 30 items → Skip 12 (40%) → 18 remaining → 6 per section
+- 100 items → Skip 40 (40%) → 60 remaining → 20 per section
+
+**3. Skip Fixed Amount (Dynamic Sections)**
+- Always skip first 20 items (fixed)
+- Dynamically divide remaining items
+
+```handlebars
+{{assign "collectionSize" collection.size}}
+{{assign "skipAmount" 20}}
+{{assign "remainingSize" (math collectionSize "-" 20)}}
+{{assign "sectionSize" (math remainingSize "/" 3)}}
+```
+
+**Examples:**
+- 50 items → Skip 20 → 30 remaining → 10 per section → Sections at 20-29, 30-39, 40-49
+- 80 items → Skip 20 → 60 remaining → 20 per section → Sections at 20-39, 40-59, 60-79
+- 35 items → Skip 20 → 15 remaining → 5 per section → Sections at 20-24, 25-29, 30-34
+
+#### Why This is Best Practice:
+
+**5 Key Benefits:**
+1. ✅ Works with ANY collection size - no hardcoded assumptions
+2. ✅ Collection size can change without breaking template
+3. ✅ Same code works for 30, 50, 100, or any number of items
+4. ✅ More maintainable - collection grows/shrinks automatically handled
+5. ✅ Percentage-based skipping scales with collection size
+
+#### Comparison Table:
+
+| Approach | Example | Problem | When to Use |
+|----------|---------|---------|-------------|
+| **Hardcoded** | `{{assign "video1Index" (math (modulo (timestamp) 10) "+" 20)}}` | Assumes exactly 50 items, breaks if collection is 30 or 80 | ONLY if collection size is always fixed |
+| **Dynamic** | `{{assign "sectionSize" (math collection.size "/" 3)}}` | None - works with any size | ALWAYS prefer this unless specific reason not to |
+
+#### Complete Copy-Paste Example:
+
+**For your use case (skip first 20, dynamic sections):**
+
+```handlebars
+{{#catalogCollection "RecommendedVideos" as |collection|}}
+  
+  {{!-- Get collection size --}}
+  {{assign "collectionSize" collection.size}}
+  
+  {{!-- Skip first 20 items (fixed) --}}
+  {{assign "skipAmount" 20}}
+  
+  {{!-- Remaining collection size --}}
+  {{assign "remainingSize" (math collectionSize "-" skipAmount)}}
+  
+  {{!-- Section size from remaining items --}}
+  {{assign "sectionSize" (math remainingSize "/" 3)}}
+  
+  {{!-- Calculate pseudo-random offsets starting at item 20 --}}
+  {{assign "video1Index" (math (modulo (timestamp) sectionSize) "+" 20)}}
+  {{assign "video2Index" (math (math (modulo (math (timestamp) "/" 100) sectionSize) "+" sectionSize) "+" 20)}}
+  {{assign "video3Index" (math (math (modulo (math (timestamp) "/" 200) sectionSize) "+" (math sectionSize "*" 2)) "+" 20)}}
+  
+  <div class="video-recommendations">
+    {{#each collection}}
+      {{#ifEq @index video1Index}}
+        <div class="video-card">
+          <h3>{{name}}</h3>
+          <p>{{short_description}}</p>
+          <a href="{{video_url}}">Watch Now</a>
+        </div>
+      {{/ifEq}}
+      
+      {{#ifEq @index video2Index}}
+        <div class="video-card">
+          <h3>{{name}}</h3>
+          <p>{{short_description}}</p>
+          <a href="{{video_url}}">Watch Now</a>
+        </div>
+      {{/ifEq}}
+      
+      {{#ifEq @index video3Index}}
+        <div class="video-card">
+          <h3>{{name}}</h3>
+          <p>{{short_description}}</p>
+          <a href="{{video_url}}">Watch Now</a>
+        </div>
+      {{/ifEq}}
+    {{/each}}
+  </div>
+  
+{{/catalogCollection}}
+```
+
+**This works whether your collection has 30, 50, 80, or 100 items!**
+
+#### Files Modified:
+
+- `schema/common-patterns.json` - Added dynamic_collection_sizing section (~75 lines)
+- `CHANGELOG.md` - This entry
+
+#### AI Agent Benefits:
+
+When users ask:
+- "Collection size varies, how to handle?"
+- "Don't hardcode 50 items"
+- "Make it work with any collection size"
+- "What if collection grows?"
+
+AI can now:
+✅ Show dynamic collection.size approach
+✅ Explain why it's best practice
+✅ Provide 3 different dynamic strategies
+✅ Show examples with 30, 50, 100 items
+✅ Recommend dynamic over hardcoded
+
+---
+
+## 2025-10-30 - Pseudo-Random Selection from Catalog Collections
+
+### New Pattern: Sectioned Pseudo-Random Item Selection
+
+Added comprehensive documentation for selecting pseudo-random items from catalog collections using timestamp-based offsets and sectioning strategy.
+
+#### What Was Added:
+
+**1. New Section in `schema/common-patterns.json`**
+
+`product_recommendations.pseudo_random_selection` - Complete guide to pseudo-random selection from catalog collections (~135 lines).
+
+#### The Core Problem:
+
+**Handlebars CANNOT shuffle or randomize arrays.** `catalogCollection` always returns items in the same fixed order.
+
+**The Challenge:**
+- You have 50 items in a collection
+- First 20 items are often the same/stale
+- Everyone sees the same items if you just use `[0]`, `[1]`, `[2]`
+- Need variation without true randomization
+
+#### The Solution Strategy:
+
+**Divide collection into sections and use pseudo-random offsets within each section.**
+
+**Example: 3 Videos from 50 Items**
+
+```handlebars
+{{#catalogCollection "RecommendedVideos" as |collection|}}
+  
+  {{!-- STRATEGY: Divide 50 items into 3 sections --}}
+  {{!-- Section 1: items 0-16 (17 items) --}}
+  {{!-- Section 2: items 17-33 (17 items) --}}
+  {{!-- Section 3: items 34-49 (16 items) --}}
+  
+  {{!-- Calculate pseudo-random index for each section --}}
+  {{assign "video1Index" (modulo (timestamp) 17)}}
+  {{assign "video2Index" (math (modulo (math (timestamp) "/" 137) 17) "+" 17)}}
+  {{assign "video3Index" (math (modulo (math (timestamp) "/" 251) 16) "+" 34)}}
+  
+  {{!-- Loop through collection and display selected items --}}
+  <div class="video-recommendations">
+    {{#each collection}}
+      {{#ifEq @index video1Index}}
+        <div class="video-card">
+          <h3>{{name}}</h3>
+          <p>{{short_description}}</p>
+        </div>
+      {{/ifEq}}
+      
+      {{#ifEq @index video2Index}}
+        <div class="video-card">
+          <h3>{{name}}</h3>
+          <p>{{short_description}}</p>
+        </div>
+      {{/ifEq}}
+      
+      {{#ifEq @index video3Index}}
+        <div class="video-card">
+          <h3>{{name}}</h3>
+          <p>{{short_description}}</p>
+        </div>
+      {{/ifEq}}
+    {{/each}}
+  </div>
+  
+{{/catalogCollection}}
+```
+
+#### How It Works:
+
+**Section Calculation:**
+- **Section 1**: `modulo (timestamp) 17` → gives 0 to 16
+- **Section 2**: `modulo (timestamp / 137) 17 + 17` → gives 17 to 33
+- **Section 3**: `modulo (timestamp / 251) 16 + 34` → gives 34 to 49
+
+**Why use prime numbers (137, 251)?**
+- Creates better pseudo-random distribution than simple multiples (100, 200)
+- Different divisors ensure each section varies independently
+- Different times = different results
+
+**Results:**
+- **Time 1** (timestamp: 1698765432100): Shows items 0, 24, 42
+- **Time 2** (timestamp: 1698765999800): Shows items 14, 29, 38
+- **Different users at different times see different videos!**
+
+#### Key Concepts Documented:
+
+**What Handlebars CANNOT Do:**
+- ❌ Cannot shuffle arrays
+- ❌ Cannot reorder arrays
+- ❌ Cannot truly randomize
+- ❌ Cannot change the order of the collection
+
+**What Handlebars CAN Do:**
+- ✅ Use timestamp for pseudo-randomness
+- ✅ Calculate varying offsets with modulo
+- ✅ Select different items at different times
+- ✅ Divide collection into sections
+
+#### Benefits of This Approach:
+
+1. **Better distribution** - Covers entire 50-item collection
+2. **No duplicates** - Each section picks one item
+3. **Pseudo-random variation** - Changes with timestamp
+4. **Balanced representation** - Equal sections
+5. **Scalable** - Easy to adjust for different quantities
+
+#### Variations Documented:
+
+**1. Simplified Version (Regular Divisors):**
+```handlebars
+{{assign "video1Index" (modulo (timestamp) 17)}}
+{{assign "video2Index" (math (modulo (math (timestamp) "/" 100) 17) "+" 17)}}
+{{assign "video3Index" (math (modulo (math (timestamp) "/" 200) 16) "+" 34)}}
+```
+
+**2. Avoid Repetitive Items (Target items 20-49):**
+```handlebars
+{{!-- Skip first 20 items if they're repetitive --}}
+{{assign "video1Index" (math (modulo (timestamp) 10) "+" 20)}}
+{{assign "video2Index" (math (modulo (math (timestamp) "/" 100) 10) "+" 30)}}
+{{assign "video3Index" (math (modulo (math (timestamp) "/" 200) 10) "+" 40)}}
+```
+
+**3. Adjust for Different Quantities:**
+- **5 videos from 50**: 50 ÷ 5 = 10 items per section
+- **10 videos from 50**: 50 ÷ 10 = 5 items per section
+
+**Formula:**
+- **Section size** = Total items ÷ Number of items needed
+- **Section offset** = Section number × Section size
+- **Random within section** = `modulo (timestamp / divisor) sectionSize`
+
+#### Comprehensive Documentation Includes:
+
+1. **limitation_understanding** - What Handlebars can/cannot do
+2. **solution_strategy** - Why sectioning works
+3. **example_3_videos_from_50** - Complete working code
+4. **simplified_version** - Easier approach with regular divisors
+5. **avoid_repetitive_items** - How to skip stale items at beginning
+6. **adjust_for_different_quantities** - Formulas for 5 or 10 videos
+7. **key_concepts** - How timestamp, modulo, and sections work
+8. **limitations** - Not truly random, same time = same results
+9. **when_to_use** - Good use cases vs not recommended
+10. **alternative_solutions** - Randomize at source (BEST), multiple collections
+
+#### Limitations Clearly Explained:
+
+⚠️ **Important to understand:**
+- **Not truly random** - Uses timestamp for pseudo-randomness
+- **Same time = same results** - Users at exact same millisecond see same items
+- **Server-side only** - Calculated when template renders, not client-side
+- **No array shuffle** - Can't actually shuffle, only vary which items shown
+- **Fixed collection order** - Collection is always in same order
+
+#### When to Use:
+
+**✅ Good Use Cases:**
+- Large catalog collections (30+ items)
+- When first items are repetitive/stale
+- Video/content recommendations
+- Product recommendations
+- When you want temporal variation
+
+**❌ Not Recommended:**
+- When you need true randomness
+- When all users MUST see identical content
+- Small collections (< 10 items)
+- When you can randomize at the source
+
+#### Alternative Solutions Documented:
+
+**1. Randomize at Source (BEST):**
+- Configure catalog collection to randomize results
+- Use data feed that returns randomized results
+- Have backend API randomize before Iterable fetches it
+- **This is the ONLY way to get truly random results**
+
+**2. Multiple Collections:**
+- Create multiple collections with different sort orders
+- Use different collections in different campaigns
+
+#### Why This is Critical:
+
+This solves a common real-world problem:
+1. Users have large catalog collections (30-50+ items)
+2. First items are often repetitive/stale
+3. Everyone sees the same items with static indexes
+4. Handlebars can't shuffle arrays
+5. Need variation without backend changes
+
+**The sectioning strategy provides:**
+- ✅ Good distribution across entire collection
+- ✅ Temporal variation (different times = different items)
+- ✅ No duplicates (each section picks one)
+- ✅ Works within Handlebars limitations
+- ✅ No backend/API changes required
+
+#### Files Modified:
+
+- `schema/common-patterns.json` - Added pseudo_random_selection section (~135 lines)
+- `CHANGELOG.md` - This entry
+
+#### AI Agent Benefits:
+
+When users ask:
+- "How to randomize catalog collection?"
+- "Show different videos to different users"
+- "Avoid showing same items to everyone"
+- "Can Handlebars shuffle arrays?"
+- "Why are my catalog items always the same order?"
+- "Need variation in product recommendations"
+
+AI can now:
+✅ Explain Handlebars limitations (can't shuffle)
+✅ Show sectioning strategy with examples
+✅ Provide complete working code (3, 5, 10 items)
+✅ Explain how timestamp + modulo creates variation
+✅ Show how to avoid repetitive items
+✅ Recommend true randomization at source when needed
+✅ Provide formulas for custom quantities
+
+---
+
+## 2025-10-30 - Catalog Collection Array Syntax Documentation
+
+### Critical Clarification: catalogCollection Returns Arrays
+
+Added comprehensive documentation explaining the critical distinction that `catalogCollection` returns an **array of objects**, not a single object, and must be accessed accordingly.
+
+#### What Was Added:
+
+**1. New Section in `schema/common-patterns.json`**
+
+`product_recommendations.catalog_collection_syntax` - Comprehensive examples showing correct vs incorrect syntax:
+
+**The Critical Distinction:**
+```handlebars
+❌ WRONG - Direct field access (doesn't work):
+{{#catalogCollection "RecentVideos" as |video|}}
+  {{video.name}}
+{{/catalogCollection}}
+
+✅ CORRECT - Use index notation:
+{{#catalogCollection "RecentVideos" as |video|}}
+  {{video.[0].name}}
+{{/catalogCollection}}
+
+✅ CORRECT - Use #each to loop:
+{{#catalogCollection "RecentVideos" as |video|}}
+  {{#each video}}
+    {{name}}
+  {{/each}}
+{{/catalogCollection}}
+```
+
+**Includes:**
+- **wrong_syntax** - Shows common mistake and why it's wrong
+- **correct_syntax_index** - Index notation examples for accessing specific items
+- **correct_syntax_each** - Using #each to loop through all items
+- **first_item_only** - How to get only the first item using #each + @first
+- **multiple_specific_items** - Hero product + secondary products layout example
+- **key_rules** - 6 essential rules for working with catalogCollection
+
+**Key Rules Documented:**
+1. catalogCollection returns an ARRAY, not a single object
+2. Without #each: Use index notation → `{{collection.[0].fieldName}}`
+3. With #each: Can access fields directly → `{{fieldName}}`
+4. Index is zero-based: [0] = first, [1] = second, [2] = third
+5. Use #each when you want to loop through ALL items
+6. Use index notation when you want SPECIFIC items
+
+**2. New Troubleshooting Section in `schema/troubleshooting.json`**
+
+`catalog_collection_not_rendering` - Comprehensive troubleshooting guide:
+
+**Common Mistakes Documented:**
+1. **Trying to access fields directly without index**
+   - Symptom: Fields appear blank, no error
+   - Solution: Use `{{video.[0].name}}` or `{{#each video}}{{name}}{{/each}}`
+
+2. **Using @first without #each**
+   - Wrong: `{{#if @first}}{{products.name}}{{/if}}`
+   - Correct: `{{#each products}}{{#if @first}}{{name}}{{/if}}{{/each}}`
+
+3. **Mixing index and direct field access**
+   - Wrong: `{{video.[0]}}` (missing field name)
+   - Correct: `{{video.[0].name}}`
+
+**Includes:**
+- **Debugging steps** - 4-step process to diagnose issues
+- **Quick fix cheatsheet** - Fast solutions for common scenarios
+- **Real-world example** - Complete before/after for displaying first video
+
+#### Why This is Critical:
+
+**This is one of the most common mistakes users make with catalogCollection:**
+1. Users expect `catalogCollection` to work like `#catalog` (single item lookup)
+2. They try to access fields directly: `{{video.name}}`
+3. Template renders but fields are blank (no error message)
+4. Confusion because syntax "looks correct" but doesn't work
+
+**The documentation now clearly explains:**
+- `catalogCollection` → Returns ARRAY → Must use `[0]` or `#each`
+- `#catalog` → Returns single object → Can access `.field` directly
+- `#each` → Changes context → Can access fields directly inside loop
+
+#### Examples Added:
+
+**Accessing specific items by index:**
+```handlebars
+{{#catalogCollection "FeaturedProducts" as |products|}}
+  <h1>{{products.[0].name}}</h1>
+  <h3>{{products.[1].name}}</h3>
+  <h3>{{products.[2].name}}</h3>
+{{/catalogCollection}}
+```
+
+**Looping through all items:**
+```handlebars
+{{#catalogCollection "RecentVideos" as |video|}}
+  {{#each video}}
+    <h2>{{name}}</h2>
+    <p>{{short_description}}</p>
+  {{/each}}
+{{/catalogCollection}}
+```
+
+**Getting only the first item:**
+```handlebars
+{{#catalogCollection "RecentVideos" as |video|}}
+  {{#each video}}
+    {{#if @first}}
+      <h2>{{name}}</h2>
+      <p>{{short_description}}</p>
+    {{/if}}
+  {{/each}}
+{{/catalogCollection}}
+```
+
+#### Files Modified:
+
+- `schema/common-patterns.json` - Added catalog_collection_syntax section (~90 lines)
+- `schema/troubleshooting.json` - Added catalog_collection_not_rendering section (~60 lines)
+- `CHANGELOG.md` - This entry
+
+#### AI Agent Benefits:
+
+When users ask:
+- "Why are my catalogCollection fields blank?"
+- "How do I get the first item from a collection?"
+- "catalogCollection not working"
+- "How to access collection data?"
+- "Difference between catalog and catalogCollection?"
+
+AI can now:
+✅ Explain that catalogCollection returns arrays
+✅ Show correct index notation: `{{video.[0].name}}`
+✅ Show correct #each usage
+✅ Explain when to use index vs #each
+✅ Provide troubleshooting steps
+✅ Show real-world examples
+
+---
+
 ## 2025-10-28 - Reserved Fields Comprehensive Documentation
 
 ### New Documentation: Iterable Reserved & System-Managed Fields

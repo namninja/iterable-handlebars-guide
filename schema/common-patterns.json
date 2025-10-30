@@ -118,6 +118,253 @@
     }
   },
   "product_recommendations": {
+    "catalog_collection_syntax": {
+      "name": "Catalog Collection - Array Access (CRITICAL)",
+      "critical_distinction": "catalogCollection returns an ARRAY - must use index notation or #each",
+      "use_case": "Understanding how to access items from catalogCollection",
+      "wrong_syntax": {
+        "description": "WRONG - Cannot directly access fields without index",
+        "code": "{{#catalogCollection \"RecentVideos\" as |video|}}\n  {{video.name}} ❌ WRONG\n  {{video.short_description}} ❌ WRONG\n{{/catalogCollection}}",
+        "why_wrong": "catalogCollection returns an ARRAY of objects, not a single object"
+      },
+      "correct_syntax_index": {
+        "description": "CORRECT - Use index notation to access specific items",
+        "code": "{{#catalogCollection \"RecentVideos\" as |video|}}\n  {{!-- Get the FIRST item --}}\n  {{video.[0].name}}\n  {{video.[0].short_description}}\n  \n  {{!-- Get the SECOND item --}}\n  {{video.[1].name}}\n  {{video.[1].short_description}}\n  \n  {{!-- Get the THIRD item --}}\n  {{video.[2].name}}\n  {{video.[2].short_description}}\n{{/catalogCollection}}",
+        "note": "Use square bracket notation with index number: [0], [1], [2], etc."
+      },
+      "correct_syntax_each": {
+        "description": "CORRECT - Use #each to loop through all items",
+        "code": "{{#catalogCollection \"RecentVideos\" as |video|}}\n  {{#each video}}\n    {{!-- NOW you can access fields directly --}}\n    {{name}}\n    {{short_description}}\n  {{/each}}\n{{/catalogCollection}}",
+        "note": "Only inside #each can you reference fields directly without parent object"
+      },
+      "first_item_only": {
+        "description": "Get ONLY the first item using #each with @first",
+        "code": "{{#catalogCollection \"RecentVideos\" as |video|}}\n  {{#each video}}\n    {{#if @first}}\n      <h2>{{name}}</h2>\n      <p>{{short_description}}</p>\n    {{/if}}\n  {{/each}}\n{{/catalogCollection}}",
+        "use_case": "Display only the first item from collection"
+      },
+      "multiple_specific_items": {
+        "description": "Access multiple specific items by index",
+        "code": "{{#catalogCollection \"FeaturedProducts\" as |products|}}\n  <div class=\"hero-product\">\n    <h1>{{products.[0].name}}</h1>\n    <img src=\"{{products.[0].imageUrl}}\">\n    <p>{{products.[0].description}}</p>\n  </div>\n  \n  <div class=\"secondary-products\">\n    <div class=\"product\">\n      <h3>{{products.[1].name}}</h3>\n      <span>{{numberFormat products.[1].price \"currency\" locale}}</span>\n    </div>\n    <div class=\"product\">\n      <h3>{{products.[2].name}}</h3>\n      <span>{{numberFormat products.[2].price \"currency\" locale}}</span>\n    </div>\n  </div>\n{{/catalogCollection}}",
+        "use_case": "Hero product + 2 secondary products layout"
+      },
+      "key_rules": {
+        "rule_1": "catalogCollection returns an ARRAY, not a single object",
+        "rule_2": "Without #each: Use index notation → {{collection.[0].fieldName}}",
+        "rule_3": "With #each: Can access fields directly → {{fieldName}}",
+        "rule_4": "Index is zero-based: [0] = first, [1] = second, [2] = third",
+        "rule_5": "Use #each when you want to loop through ALL items",
+        "rule_6": "Use index notation when you want SPECIFIC items"
+      }
+    },
+    "pseudo_random_selection": {
+      "name": "Pseudo-Random Selection from Catalog Collections",
+      "critical_problem": "Handlebars CANNOT shuffle or randomize arrays - catalogCollection always returns items in the same fixed order",
+      "use_case": "Need to show different videos/products to different users from a large collection (e.g., 50 items) to avoid everyone seeing the same items",
+      "limitation_understanding": {
+        "what_handlebars_cannot_do": [
+          "Cannot shuffle arrays",
+          "Cannot reorder arrays",
+          "Cannot truly randomize",
+          "Cannot change the order of the collection"
+        ],
+        "what_handlebars_can_do": [
+          "Use timestamp for pseudo-randomness",
+          "Calculate varying offsets with modulo",
+          "Select different items at different times",
+          "Divide collection into sections"
+        ]
+      },
+      "solution_strategy": {
+        "description": "Divide collection into sections and use pseudo-random offsets within each section for better distribution",
+        "example": "50 items ÷ 3 videos = ~17 items per section. Pick 1 random item from each section.",
+        "benefits": [
+          "Better distribution across entire collection",
+          "No duplicates (each section picks one item)",
+          "Varies with timestamp (different times = different items)",
+          "Balanced representation"
+        ]
+      },
+      "example_3_videos_from_50": {
+        "description": "Select 3 pseudo-random videos from a 50-item collection",
+        "section_breakdown": {
+          "section_1": "Items 0-16 (17 items)",
+          "section_2": "Items 17-33 (17 items)",
+          "section_3": "Items 34-49 (16 items)"
+        },
+        "complete_code": "{{#catalogCollection \"RecommendedVideos\" as |collection|}}\n  \n  {{!-- STRATEGY: Divide 50 items into 3 sections --}}\n  {{!-- Section 1: items 0-16 (17 items) --}}\n  {{!-- Section 2: items 17-33 (17 items) --}}\n  {{!-- Section 3: items 34-49 (16 items) --}}\n  \n  {{!-- Calculate pseudo-random index for each section --}}\n  {{assign \"video1Index\" (modulo (timestamp) 17)}}\n  {{assign \"video2Index\" (math (modulo (math (timestamp) \"/\" 137) 17) \"+\" 17)}}\n  {{assign \"video3Index\" (math (modulo (math (timestamp) \"/\" 251) 16) \"+\" 34)}}\n  \n  {{!-- Loop through collection and display selected items --}}\n  <div class=\"video-recommendations\">\n    {{#each collection}}\n      \n      {{!-- Video 1: from section 1 (0-16) --}}\n      {{#ifEq @index video1Index}}\n        <div class=\"video-card\">\n          <img src=\"{{thumbnail_url}}\" alt=\"{{name}}\">\n          <h3>{{name}}</h3>\n          <p>{{short_description}}</p>\n          <a href=\"{{video_url}}\" class=\"watch-btn\">Watch Now</a>\n        </div>\n      {{/ifEq}}\n      \n      {{!-- Video 2: from section 2 (17-33) --}}\n      {{#ifEq @index video2Index}}\n        <div class=\"video-card\">\n          <img src=\"{{thumbnail_url}}\" alt=\"{{name}}\">\n          <h3>{{name}}</h3>\n          <p>{{short_description}}</p>\n          <a href=\"{{video_url}}\" class=\"watch-btn\">Watch Now</a>\n        </div>\n      {{/ifEq}}\n      \n      {{!-- Video 3: from section 3 (34-49) --}}\n      {{#ifEq @index video3Index}}\n        <div class=\"video-card\">\n          <img src=\"{{thumbnail_url}}\" alt=\"{{name}}\">\n          <h3>{{name}}</h3>\n          <p>{{short_description}}</p>\n          <a href=\"{{video_url}}\" class=\"watch-btn\">Watch Now</a>\n        </div>\n      {{/ifEq}}\n      \n    {{/each}}\n  </div>\n  \n{{/catalogCollection}}",
+        "how_it_works": {
+          "video1Index": "modulo (timestamp) 17 → gives 0 to 16",
+          "video2Index": "modulo (timestamp / 137) 17 + 17 → gives 17 to 33",
+          "video3Index": "modulo (timestamp / 251) 16 + 34 → gives 34 to 49",
+          "prime_numbers_note": "Using primes (137, 251) creates better pseudo-random distribution than simple multiples (100, 200)"
+        },
+        "expected_results": {
+          "time_1_example": {
+            "timestamp": 1698765432100,
+            "video1": "Index 0 (from section 1)",
+            "video2": "Index 24 (from section 2)",
+            "video3": "Index 42 (from section 3)"
+          },
+          "time_2_example": {
+            "timestamp": 1698765999800,
+            "video1": "Index 14 (from section 1)",
+            "video2": "Index 29 (from section 2)",
+            "video3": "Index 38 (from section 3)"
+          },
+          "key_point": "Different users at different times see different videos!"
+        }
+      },
+      "simplified_version": {
+        "description": "Simpler approach using regular divisors instead of primes",
+        "code": "{{#catalogCollection \"RecommendedVideos\" as |collection|}}\n  \n  {{!-- Simpler approach with regular divisors --}}\n  {{assign \"video1Index\" (modulo (timestamp) 17)}}\n  {{assign \"video2Index\" (math (modulo (math (timestamp) \"/\" 100) 17) \"+\" 17)}}\n  {{assign \"video3Index\" (math (modulo (math (timestamp) \"/\" 200) 16) \"+\" 34)}}\n  \n  <div class=\"video-recommendations\">\n    {{#each collection}}\n      {{#ifEq @index video1Index}}\n        <div class=\"video-card\">\n          <h3>{{name}}</h3>\n          <p>{{short_description}}</p>\n        </div>\n      {{/ifEq}}\n      \n      {{#ifEq @index video2Index}}\n        <div class=\"video-card\">\n          <h3>{{name}}</h3>\n          <p>{{short_description}}</p>\n        </div>\n      {{/ifEq}}\n      \n      {{#ifEq @index video3Index}}\n        <div class=\"video-card\">\n          <h3>{{name}}</h3>\n          <p>{{short_description}}</p>\n        </div>\n      {{/ifEq}}\n    {{/each}}\n  </div>\n  \n{{/catalogCollection}}",
+        "note": "Works well, slightly less random distribution than prime numbers"
+      },
+      "avoid_repetitive_items": {
+        "description": "If first 20 items are always the same, target items 20-49 only",
+        "use_case": "Collection has repetitive/stale items at the beginning",
+        "code": "{{#catalogCollection \"RecommendedVideos\" as |collection|}}\n  \n  {{!-- Focus on items 20-49 (avoid first 20 if they're repetitive) --}}\n  {{assign \"video1Index\" (math (modulo (timestamp) 10) \"+\" 20)}}\n  {{assign \"video2Index\" (math (modulo (math (timestamp) \"/\" 100) 10) \"+\" 30)}}\n  {{assign \"video3Index\" (math (modulo (math (timestamp) \"/\" 200) 10) \"+\" 40)}}\n  \n  <div class=\"video-recommendations\">\n    {{#each collection}}\n      {{#ifEq @index video1Index}}\n        <div class=\"video-card\">\n          <h3>{{name}}</h3>\n          <p>{{short_description}}</p>\n        </div>\n      {{/ifEq}}\n      \n      {{#ifEq @index video2Index}}\n        <div class=\"video-card\">\n          <h3>{{name}}</h3>\n          <p>{{short_description}}</p>\n        </div>\n      {{/ifEq}}\n      \n      {{#ifEq @index video3Index}}\n        <div class=\"video-card\">\n          <h3>{{name}}</h3>\n          <p>{{short_description}}</p>\n        </div>\n      {{/ifEq}}\n    {{/each}}\n  </div>\n  \n{{/catalogCollection}}",
+        "section_breakdown": {
+          "section_1": "Items 20-29 (10 items)",
+          "section_2": "Items 30-39 (10 items)",
+          "section_3": "Items 40-49 (10 items)"
+        },
+        "note": "This version skips items 0-19 and only picks from items 20-49"
+      },
+      "dynamic_collection_sizing": {
+        "name": "Dynamic Collection Sizing (BEST PRACTICE)",
+        "description": "Use collection.size to dynamically calculate sections instead of hardcoding assumptions",
+        "use_case": "Collection size may vary - don't assume it's always 50 items",
+        "critical_improvement": "Previous examples assumed 50 items. This approach works with ANY collection size.",
+        "basic_dynamic_approach": {
+          "description": "Dynamically calculate section size based on actual collection size",
+          "code": "{{#catalogCollection \"RecommendedVideos\" as |collection|}}\n  \n  {{!-- Get collection size --}}\n  {{assign \"collectionSize\" collection.size}}\n  \n  {{!-- How many videos we want --}}\n  {{assign \"videosNeeded\" 3}}\n  \n  {{!-- Calculate section size: collectionSize / videosNeeded --}}\n  {{assign \"sectionSize\" (math collectionSize \"/\" videosNeeded)}}\n  \n  {{!-- Calculate pseudo-random index for each section --}}\n  {{assign \"video1Index\" (modulo (timestamp) sectionSize)}}\n  {{assign \"video2Index\" (math (modulo (math (timestamp) \"/\" 100) sectionSize) \"+\" sectionSize)}}\n  {{assign \"video3Index\" (math (modulo (math (timestamp) \"/\" 200) sectionSize) \"+\" (math sectionSize \"*\" 2))}}\n  \n  <div class=\"video-recommendations\">\n    {{#each collection}}\n      {{#ifEq @index video1Index}}\n        <div class=\"video-card\">\n          <h3>{{name}}</h3>\n          <p>{{short_description}}</p>\n        </div>\n      {{/ifEq}}\n      \n      {{#ifEq @index video2Index}}\n        <div class=\"video-card\">\n          <h3>{{name}}</h3>\n          <p>{{short_description}}</p>\n        </div>\n      {{/ifEq}}\n      \n      {{#ifEq @index video3Index}}\n        <div class=\"video-card\">\n          <h3>{{name}}</h3>\n          <p>{{short_description}}</p>\n        </div>\n      {{/ifEq}}\n    {{/each}}\n  </div>\n  \n{{/catalogCollection}}",
+          "how_it_works": {
+            "step_1": "Get collection size: collection.size",
+            "step_2": "Calculate section size: collectionSize / 3",
+            "step_3": "Section 1: 0 to sectionSize-1",
+            "step_4": "Section 2: sectionSize to (sectionSize*2)-1",
+            "step_5": "Section 3: sectionSize*2 to end",
+            "example_30_items": "30 items / 3 videos = 10 items per section (0-9, 10-19, 20-29)",
+            "example_60_items": "60 items / 3 videos = 20 items per section (0-19, 20-39, 40-59)",
+            "example_90_items": "90 items / 3 videos = 30 items per section (0-29, 30-59, 60-89)"
+          }
+        },
+        "skip_percentage_dynamic": {
+          "description": "Dynamically skip a percentage of items at the beginning (e.g., skip first 40%)",
+          "use_case": "First portion of collection is repetitive, but collection size varies",
+          "code": "{{#catalogCollection \"RecommendedVideos\" as |collection|}}\n  \n  {{!-- Get collection size --}}\n  {{assign \"collectionSize\" collection.size}}\n  \n  {{!-- Calculate 40% offset (skip first 40% if they're repetitive) --}}\n  {{assign \"skipAmount\" (math collectionSize \"*\" 0.4)}}\n  \n  {{!-- Remaining collection size --}}\n  {{assign \"remainingSize\" (math collectionSize \"-\" skipAmount)}}\n  \n  {{!-- Section size from remaining items --}}\n  {{assign \"sectionSize\" (math remainingSize \"/\" 3)}}\n  \n  {{!-- Calculate pseudo-random offsets starting after skipAmount --}}\n  {{assign \"video1Index\" (math (modulo (timestamp) sectionSize) \"+\" skipAmount)}}\n  {{assign \"video2Index\" (math (math (modulo (math (timestamp) \"/\" 100) sectionSize) \"+\" sectionSize) \"+\" skipAmount)}}\n  {{assign \"video3Index\" (math (math (modulo (math (timestamp) \"/\" 200) sectionSize) \"+\" (math sectionSize \"*\" 2)) \"+\" skipAmount)}}\n  \n  <div class=\"video-recommendations\">\n    {{#each collection}}\n      {{#ifEq @index video1Index}}\n        <div class=\"video-card\">\n          <h3>{{name}}</h3>\n          <p>{{short_description}}</p>\n        </div>\n      {{/ifEq}}\n      \n      {{#ifEq @index video2Index}}\n        <div class=\"video-card\">\n          <h3>{{name}}</h3>\n          <p>{{short_description}}</p>\n        </div>\n      {{/ifEq}}\n      \n      {{#ifEq @index video3Index}}\n        <div class=\"video-card\">\n          <h3>{{name}}</h3>\n          <p>{{short_description}}</p>\n        </div>\n      {{/ifEq}}\n    {{/each}}\n  </div>\n  \n{{/catalogCollection}}",
+          "how_it_works": {
+            "step_1": "Get collection size: collection.size",
+            "step_2": "Calculate skip amount: collectionSize * 0.4 (40%)",
+            "step_3": "Calculate remaining: collectionSize - skipAmount",
+            "step_4": "Calculate section size: remainingSize / 3",
+            "step_5": "Each section offset starts from skipAmount",
+            "example_50_items": "50 items → Skip 20 (40%) → 30 remaining → 10 per section → Sections at 20-29, 30-39, 40-49",
+            "example_30_items": "30 items → Skip 12 (40%) → 18 remaining → 6 per section → Sections at 12-17, 18-23, 24-29",
+            "example_100_items": "100 items → Skip 40 (40%) → 60 remaining → 20 per section → Sections at 40-59, 60-79, 80-99"
+          }
+        },
+        "skip_fixed_amount_dynamic": {
+          "description": "Skip a fixed number of items (e.g., always skip first 20), then divide the rest dynamically",
+          "use_case": "You know first 20 items are always repetitive, but total size varies",
+          "code": "{{#catalogCollection \"RecommendedVideos\" as |collection|}}\n  \n  {{!-- Get collection size --}}\n  {{assign \"collectionSize\" collection.size}}\n  \n  {{!-- Skip first 20 items (fixed) --}}\n  {{assign \"skipAmount\" 20}}\n  \n  {{!-- Remaining collection size --}}\n  {{assign \"remainingSize\" (math collectionSize \"-\" skipAmount)}}\n  \n  {{!-- Section size from remaining items --}}\n  {{assign \"sectionSize\" (math remainingSize \"/\" 3)}}\n  \n  {{!-- Calculate pseudo-random offsets starting at item 20 --}}\n  {{assign \"video1Index\" (math (modulo (timestamp) sectionSize) \"+\" 20)}}\n  {{assign \"video2Index\" (math (math (modulo (math (timestamp) \"/\" 100) sectionSize) \"+\" sectionSize) \"+\" 20)}}\n  {{assign \"video3Index\" (math (math (modulo (math (timestamp) \"/\" 200) sectionSize) \"+\" (math sectionSize \"*\" 2)) \"+\" 20)}}\n  \n  <div class=\"video-recommendations\">\n    {{#each collection}}\n      {{#ifEq @index video1Index}}\n        <div class=\"video-card\">\n          <h3>{{name}}</h3>\n          <p>{{short_description}}</p>\n        </div>\n      {{/ifEq}}\n      \n      {{#ifEq @index video2Index}}\n        <div class=\"video-card\">\n          <h3>{{name}}</h3>\n          <p>{{short_description}}</p>\n        </div>\n      {{/ifEq}}\n      \n      {{#ifEq @index video3Index}}\n        <div class=\"video-card\">\n          <h3>{{name}}</h3>\n          <p>{{short_description}}</p>\n        </div>\n      {{/ifEq}}\n    {{/each}}\n  </div>\n  \n{{/catalogCollection}}",
+          "how_it_works": {
+            "step_1": "Get collection size: collection.size",
+            "step_2": "Skip first 20 items (fixed)",
+            "step_3": "Calculate remaining: collectionSize - 20",
+            "step_4": "Calculate section size: remainingSize / 3",
+            "step_5": "Each section offset starts from item 20",
+            "example_50_items": "50 items → Skip 20 → 30 remaining → 10 per section → Sections at 20-29, 30-39, 40-49",
+            "example_80_items": "80 items → Skip 20 → 60 remaining → 20 per section → Sections at 20-39, 40-59, 60-79",
+            "example_35_items": "35 items → Skip 20 → 15 remaining → 5 per section → Sections at 20-24, 25-29, 30-34"
+          }
+        },
+        "flexible_video_count": {
+          "description": "Make number of videos configurable by changing one variable",
+          "code": "{{#catalogCollection \"RecommendedVideos\" as |collection|}}\n  \n  {{!-- CONFIGURATION: Change this to get different number of videos --}}\n  {{assign \"videosNeeded\" 5}}\n  \n  {{!-- Dynamic calculation --}}\n  {{assign \"collectionSize\" collection.size}}\n  {{assign \"sectionSize\" (math collectionSize \"/\" videosNeeded)}}\n  \n  {{!-- Calculate indexes for each video --}}\n  {{assign \"video1Index\" (modulo (timestamp) sectionSize)}}\n  {{assign \"video2Index\" (math (modulo (math (timestamp) \"/\" 100) sectionSize) \"+\" sectionSize)}}\n  {{assign \"video3Index\" (math (modulo (math (timestamp) \"/\" 200) sectionSize) \"+\" (math sectionSize \"*\" 2))}}\n  {{assign \"video4Index\" (math (modulo (math (timestamp) \"/\" 300) sectionSize) \"+\" (math sectionSize \"*\" 3))}}\n  {{assign \"video5Index\" (math (modulo (math (timestamp) \"/\" 400) sectionSize) \"+\" (math sectionSize \"*\" 4))}}\n  \n  <div class=\"video-recommendations\">\n    {{#each collection}}\n      {{#ifEq @index video1Index}}\n        <div class=\"video-card\"><h3>{{name}}</h3></div>\n      {{/ifEq}}\n      {{#ifEq @index video2Index}}\n        <div class=\"video-card\"><h3>{{name}}</h3></div>\n      {{/ifEq}}\n      {{#ifEq @index video3Index}}\n        <div class=\"video-card\"><h3>{{name}}</h3></div>\n      {{/ifEq}}\n      {{#ifEq @index video4Index}}\n        <div class=\"video-card\"><h3>{{name}}</h3></div>\n      {{/ifEq}}\n      {{#ifEq @index video5Index}}\n        <div class=\"video-card\"><h3>{{name}}</h3></div>\n      {{/ifEq}}\n    {{/each}}\n  </div>\n  \n{{/catalogCollection}}",
+          "note": "Just change videosNeeded value and add/remove corresponding video blocks"
+        },
+        "why_this_is_best_practice": {
+          "reason_1": "Works with ANY collection size - no hardcoded assumptions",
+          "reason_2": "Collection size can change without breaking template",
+          "reason_3": "Same code works for 30, 50, 100, or any number of items",
+          "reason_4": "More maintainable - collection grows/shrinks automatically handled",
+          "reason_5": "Percentage-based skipping scales with collection size"
+        },
+        "comparison": {
+          "hardcoded_approach": {
+            "example": "{{assign \"video1Index\" (math (modulo (timestamp) 10) \"+\" 20)}}",
+            "problem": "Assumes exactly 50 items, breaks if collection is 30 or 80 items",
+            "when_to_use": "ONLY if you know collection size is always fixed"
+          },
+          "dynamic_approach": {
+            "example": "{{assign \"sectionSize\" (math collection.size \"/\" 3)}}",
+            "benefit": "Works with ANY collection size automatically",
+            "when_to_use": "ALWAYS prefer this unless you have specific reason not to"
+          }
+        }
+      },
+      "adjust_for_different_quantities": {
+        "5_videos_from_50": {
+          "section_size": "50 ÷ 5 = 10 items per section",
+          "code_snippet": "{{assign \"video1Index\" (modulo (timestamp) 10)}}\n{{assign \"video2Index\" (math (modulo (math (timestamp) \"/\" 100) 10) \"+\" 10)}}\n{{assign \"video3Index\" (math (modulo (math (timestamp) \"/\" 200) 10) \"+\" 20)}}\n{{assign \"video4Index\" (math (modulo (math (timestamp) \"/\" 300) 10) \"+\" 30)}}\n{{assign \"video5Index\" (math (modulo (math (timestamp) \"/\" 400) 10) \"+\" 40)}}"
+        },
+        "10_videos_from_50": {
+          "section_size": "50 ÷ 10 = 5 items per section",
+          "code_snippet": "{{assign \"video1Index\" (modulo (timestamp) 5)}}\n{{assign \"video2Index\" (math (modulo (math (timestamp) \"/\" 100) 5) \"+\" 5)}}\n{{assign \"video3Index\" (math (modulo (math (timestamp) \"/\" 200) 5) \"+\" 10)}}\n{{!-- Continue for all 10 videos... --}}"
+        },
+        "formula": {
+          "section_size": "Total items ÷ Number of items needed",
+          "section_offset": "Section number × Section size",
+          "random_within_section": "modulo (timestamp / divisor) sectionSize"
+        }
+      },
+      "key_concepts": {
+        "timestamp_as_seed": "timestamp returns current time in milliseconds - different times give different values",
+        "modulo_for_range": "modulo operation keeps result within 0 to N-1 range",
+        "section_strategy": "Dividing into sections ensures good distribution across entire collection",
+        "different_divisors": "Using different divisors (100, 200, 300) or primes (137, 251, 373) ensures each section varies independently",
+        "pseudo_random_note": "This is pseudo-random, not truly random. Same timestamp = same results. But provides good variation over time."
+      },
+      "limitations": {
+        "not_truly_random": "Uses timestamp for pseudo-randomness, not cryptographic randomness",
+        "same_time_same_results": "Users opening email at exact same millisecond see same items",
+        "server_side_only": "Calculated when template renders, not client-side",
+        "no_array_shuffle": "Cannot actually shuffle the array, only vary which items are shown",
+        "fixed_collection_order": "Collection itself is always in same order, we're just selecting different items from it"
+      },
+      "when_to_use": {
+        "good_use_cases": [
+          "Large catalog collections (30+ items)",
+          "When first items are repetitive/stale",
+          "Video/content recommendations",
+          "Product recommendations",
+          "When you want temporal variation (different times show different items)"
+        ],
+        "not_recommended": [
+          "When you need true randomness",
+          "When all users MUST see identical content",
+          "Small collections (< 10 items)",
+          "When you can randomize at the source (catalog configuration, data feed)"
+        ]
+      },
+      "alternative_solutions": {
+        "randomize_at_source": {
+          "description": "BEST solution: Randomize the collection before Handlebars",
+          "options": [
+            "Configure catalog collection to randomize results (if supported)",
+            "Use data feed that returns randomized results",
+            "Have backend API randomize collection before Iterable fetches it"
+          ],
+          "note": "This is the ONLY way to get truly random results"
+        },
+        "multiple_collections": {
+          "description": "Create multiple catalog collections with different sort orders",
+          "example": "RecentVideos, TrendingVideos, RandomVideos",
+          "note": "Use different collections in different campaigns"
+        }
+      }
+    },
     "catalog_product_loop": {
       "name": "Product Recommendation Loop",
       "code": "{{#each recommendedProducts}}\n  {{#catalog \"products\" this as |product|}}\n    <div class=\"product-card\">\n      <img src=\"{{product.imageUrl}}\" alt=\"{{product.name}}\">\n      <h3>{{product.name}}</h3>\n      <p>{{abbreviate product.description 100}}</p>\n      <span>{{numberFormat product.price \"currency\" locale}}</span>\n      <a href=\"{{product.url}}\">Shop Now</a>\n    </div>\n  {{/catalog}}\n{{/each}}",

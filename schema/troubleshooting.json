@@ -87,6 +87,68 @@
         }
       ]
     },
+    "catalog_collection_not_rendering": {
+      "issue": "catalogCollection fields are blank or not showing",
+      "critical": "catalogCollection returns an ARRAY, not a single object",
+      "common_mistakes": [
+        {
+          "mistake": "Trying to access fields directly without index",
+          "wrong_code": "{{#catalogCollection \"RecentVideos\" as |video|}}\n  {{video.name}} ❌\n  {{video.short_description}} ❌\n{{/catalogCollection}}",
+          "why_wrong": "video is an ARRAY, not an object - you cannot access .name directly",
+          "symptoms": [
+            "Fields appear blank",
+            "Nothing renders inside catalogCollection block",
+            "No error message, just empty output"
+          ],
+          "correct_solution_1": "Use index notation to access specific items",
+          "correct_code_1": "{{#catalogCollection \"RecentVideos\" as |video|}}\n  {{video.[0].name}}\n  {{video.[0].short_description}}\n{{/catalogCollection}}",
+          "correct_solution_2": "Use #each to loop through all items",
+          "correct_code_2": "{{#catalogCollection \"RecentVideos\" as |video|}}\n  {{#each video}}\n    {{name}}\n    {{short_description}}\n  {{/each}}\n{{/catalogCollection}}"
+        },
+        {
+          "mistake": "Using @first without #each",
+          "wrong_code": "{{#catalogCollection \"Products\" as |products|}}\n  {{#if @first}}\n    {{products.name}} ❌\n  {{/if}}\n{{/catalogCollection}}",
+          "why_wrong": "@first only works inside #each loops",
+          "correct_code": "{{#catalogCollection \"Products\" as |products|}}\n  {{#each products}}\n    {{#if @first}}\n      {{name}} ✅\n    {{/if}}\n  {{/each}}\n{{/catalogCollection}}"
+        },
+        {
+          "mistake": "Mixing index and direct field access",
+          "wrong_code": "{{#catalogCollection \"Videos\" as |video|}}\n  {{video.[0]}} ❌\n{{/catalogCollection}}",
+          "why_wrong": "Missing field name after index",
+          "correct_code": "{{#catalogCollection \"Videos\" as |video|}}\n  {{video.[0].name}} ✅\n  {{video.[0].description}} ✅\n{{/catalogCollection}}"
+        }
+      ],
+      "key_rules": {
+        "rule_1": "catalogCollection returns an ARRAY - always use [index] or #each",
+        "rule_2": "WITHOUT #each: {{collection.[0].fieldName}}",
+        "rule_3": "WITH #each: {{fieldName}} (can access fields directly)",
+        "rule_4": "@first, @last, @index only work INSIDE #each"
+      },
+      "debugging_steps": [
+        "1. Check: Are you using index notation? {{video.[0].name}}",
+        "2. Check: Are you using #each before accessing fields directly?",
+        "3. Test: Try {{#each video}}{{name}}{{/each}} to verify data exists",
+        "4. Verify: Collection name matches exactly (case-sensitive)"
+      ],
+      "quick_fix_cheatsheet": {
+        "first_item_only": {
+          "option_1": "{{collection.[0].fieldName}}",
+          "option_2": "{{#each collection}}{{#if @first}}{{fieldName}}{{/if}}{{/each}}"
+        },
+        "specific_items": {
+          "first": "{{collection.[0].fieldName}}",
+          "second": "{{collection.[1].fieldName}}",
+          "third": "{{collection.[2].fieldName}}"
+        },
+        "all_items": "{{#each collection}}{{fieldName}}{{/each}}"
+      },
+      "real_world_example": {
+        "scenario": "Display first video name from RecentVideos collection",
+        "wrong": "{{#catalogCollection \"RecentVideos\" as |video|}}{{video.name}}{{/catalogCollection}}",
+        "correct_option_1": "{{#catalogCollection \"RecentVideos\" as |video|}}{{video.[0].name}}{{/catalogCollection}}",
+        "correct_option_2": "{{#catalogCollection \"RecentVideos\" as |video|}}{{#each video}}{{#if @first}}{{name}}{{/if}}{{/each}}{{/catalogCollection}}"
+      }
+    },
     "template_fails_to_render": {
       "issue": "Template execution fails at send time",
       "common_causes": [
