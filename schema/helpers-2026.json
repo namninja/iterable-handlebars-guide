@@ -1,0 +1,192 @@
+{
+  "_meta": {
+    "description": "New Iterable Handlebars helpers added in 2026. Supplement to schema/helpers.json.",
+    "last_updated": "2026-06-30",
+    "feature_flag_note": "groupBy and sortBy both require the HandlebarsArrayHelpers feature flag to be enabled for the project. When the flag is off, helpers return empty string with no error."
+  },
+
+  "array_helpers": {
+
+    "groupBy": {
+      "name": "groupBy",
+      "status": "GA",
+      "ga_date": "2026-05-28",
+      "pr": "#30663",
+      "feature_flag": "HandlebarsArrayHelpers",
+      "description": "Groups an array of objects by one or more field values. Outputs a list of group objects each containing the key values and the items belonging to that group.",
+      "syntax": "{{#groupBy array field=\"fieldName\" as |groups|}}...{{/groupBy}}",
+      "parameters": {
+        "array": {
+          "type": "array",
+          "required": true,
+          "description": "The array of objects to group. Can be a template variable, event data path, or catalogCollection output."
+        },
+        "field": {
+          "type": "string",
+          "required": true,
+          "description": "Comma-separated list of field paths to group by. Dot notation supported for nested fields. Example: field=\"category\" or field=\"shipping.method,shipping.date\""
+        }
+      },
+      "output_structure": {
+        "groups": {
+          "type": "array",
+          "description": "Array of group objects, in first-seen insertion order.",
+          "group_object": {
+            "key": "Object containing the group key fields, accessed via full dot path matching the field= parameter.",
+            "count": "Number of items in this group.",
+            "items": "Array of the original objects that belong to this group."
+          }
+        }
+      },
+      "key_access_rule": {
+        "rule": "Access group keys using the FULL field path from the field= parameter.",
+        "example_single": "field=\"category\" → {{group.key.category}}",
+        "example_nested": "field=\"shipping.method\" → {{group.key.shipping.method}}",
+        "example_multi": "field=\"a.b,c.d\" → {{group.key.a.b}} and {{group.key.c.d}}",
+        "common_mistake": "Using leaf name only: field=\"LineItems.ItemShippingMethod\" → {{group.key.ItemShippingMethod}} (WRONG) → use {{group.key.LineItems.ItemShippingMethod}} (CORRECT)"
+      },
+      "limits": {
+        "max_input_items": 100,
+        "behavior_when_exceeded": "Silently truncates to 100 items. No error thrown."
+      },
+      "behaviors": {
+        "group_ordering": "First-seen insertion order — the key that appears first in the array appears first in groups.",
+        "empty_array": "Renders the block with empty groups array. Wrap content with {{#if groups}} for empty-state handling.",
+        "null_values": "Items where the field is null/missing are grouped together under a null key.",
+        "at_index_warning": "@index, @first, @last inside {{#each group.items}} reflect the outer groups loop, not the inner items iteration. Use named block params instead: {{#each group.items as |item iIdx|}}"
+      },
+      "examples": {
+        "basic_single_field": {
+          "description": "Group products by category",
+          "code": "{{#groupBy products field=\"category\" as |groups|}}\n  {{#each groups as |group|}}\n    <h2>{{group.key.category}} ({{group.count}} items)</h2>\n    {{#each group.items as |product|}}\n      <p>{{product.name}} — ${{numberFormat product.price \"0.00\"}}</p>\n    {{/each}}\n  {{/each}}\n{{/groupBy}}"
+        },
+        "nested_field": {
+          "description": "Group by nested shipping method",
+          "code": "{{#groupBy orders field=\"shipping.method\" as |groups|}}\n  {{#each groups as |group|}}\n    <h3>{{group.key.shipping.method}}</h3>\n    {{#each group.items as |order|}}{{order.id}}{{/each}}\n  {{/each}}\n{{/groupBy}}"
+        },
+        "multi_field": {
+          "description": "Group by multiple fields (composite key)",
+          "code": "{{#groupBy items field=\"shippingMethod,estimatedDate\" as |groups|}}\n  {{#each groups as |group|}}\n    <h3>{{group.key.shippingMethod}} — {{group.key.estimatedDate}}</h3>\n    {{#each group.items as |item|}}{{item.name}}{{/each}}\n  {{/each}}\n{{/groupBy}}"
+        },
+        "with_catalog_collection": {
+          "description": "Group catalog items by category",
+          "code": "{{#catalogCollection \"AllProducts\" as |items|}}\n  {{#groupBy items field=\"category\" as |groups|}}\n    {{#each groups as |group|}}\n      <h2>{{group.key.category}}</h2>\n      {{#each group.items as |product|}}\n        <img src=\"{{product.imageUrl}}\" alt=\"{{product.name}}\" width=\"200\">\n        <h3>{{product.name}}</h3>\n        <p>{{product.description}}</p>\n        <strong>${{numberFormat product.price \"0.00\"}}</strong>\n      {{/each}}\n    {{/each}}\n  {{/groupBy}}\n{{/catalogCollection}}"
+        },
+        "rei_order_confirmation": {
+          "description": "REI-style: sort by date, group by shipping method + date, inner sort by price",
+          "code": "{{#sortBy xmldata.ShipTos.ShipTo field=\"LineItems.ItemFirstPromisedDate\" order=\"asc\" as |sorted|}}\n{{#groupBy sorted field=\"LineItems.ItemShippingMethod,LineItems.ItemFirstPromisedDate\" as |groups|}}\n{{#each groups as |group|}}\n  <h3>{{group.key.LineItems.ItemShippingMethod}}\n      — Arrives {{dateFormat group.key.LineItems.ItemFirstPromisedDate \"MMM dd, yyyy\"}}</h3>\n  {{#sortBy group.items field=\"LineItems.ItemPrice\" order=\"desc\" as |sortedItems|}}\n  {{#each sortedItems as |item|}}\n    {{item.LineItems.ItemName}} Qty: {{item.LineItems.ItemQuantity}} ${{item.LineItems.ItemPrice}}\n  {{/each}}\n  {{/sortBy}}\n{{/each}}\n{{/groupBy}}\n{{/sortBy}}"
+        }
+      }
+    },
+
+    "sortBy": {
+      "name": "sortBy",
+      "status": "GA",
+      "ga_date": "2026-06-05",
+      "pr": "#30792",
+      "feature_flag": "HandlebarsArrayHelpers",
+      "description": "Sorts an array of objects by one or more field values. Returns a new sorted array — the original array is not modified.",
+      "syntax": "{{#sortBy array field=\"fieldName\" order=\"asc\" as |sorted|}}...{{/sortBy}}",
+      "parameters": {
+        "array": {
+          "type": "array",
+          "required": true,
+          "description": "The array of objects to sort."
+        },
+        "field": {
+          "type": "string",
+          "required": true,
+          "description": "Comma-separated field paths. First field is primary sort. Additional fields are tiebreakers. Example: field=\"priority,name\""
+        },
+        "order": {
+          "type": "string",
+          "required": false,
+          "default": "asc",
+          "values": ["asc", "desc"],
+          "description": "Sort direction. Applies to all fields when multiple fields given."
+        }
+      },
+      "behaviors": {
+        "type_detection": "Auto-detects field type (Date / Number / String) from the first non-null value. No explicit type parameter needed.",
+        "nulls": "Null values always sort last regardless of asc/desc direction.",
+        "multi_field": "First field is primary sort key. Subsequent fields break ties. All fields use the same order= direction.",
+        "composition": "sortBy can wrap groupBy, and groupBy can contain sortBy. Full nesting confirmed working.",
+        "immutability": "Does not modify the input array — returns a new sorted array."
+      },
+      "examples": {
+        "basic_price_sort": {
+          "description": "Sort catalog items by price ascending",
+          "code": "{{#catalogCollection \"AllProducts\" as |items|}}\n  {{#sortBy items field=\"price\" order=\"asc\" as |sorted|}}\n    {{#each sorted as |product|}}\n      {{product.name}} — ${{numberFormat product.price \"0.00\"}}\n    {{/each}}\n  {{/sortBy}}\n{{/catalogCollection}}"
+        },
+        "multi_field_sort": {
+          "description": "Sort by priority desc, then name asc as tiebreaker",
+          "code": "{{#sortBy items field=\"priority,name\" order=\"desc\" as |sorted|}}\n  {{#each sorted as |item|}}{{item.name}} (priority {{item.priority}}){{/each}}\n{{/sortBy}}"
+        },
+        "sort_then_group": {
+          "description": "Pre-sort to control group insertion order",
+          "why": "groupBy preserves first-seen key order. Pre-sorting forces groups into the desired sequence.",
+          "code": "{{#sortBy items field=\"deliveryDate\" order=\"asc\" as |sorted|}}\n  {{#groupBy sorted field=\"deliveryDate\" as |groups|}}\n    {{#each groups as |group|}}\n      <h3>Arriving {{group.key.deliveryDate}} ({{group.count}} items)</h3>\n      {{#each group.items as |item|}}{{item.name}}{{/each}}\n    {{/each}}\n  {{/groupBy}}\n{{/sortBy}}"
+        },
+        "sort_within_groups": {
+          "description": "Group first, then sort items within each group",
+          "code": "{{#groupBy items field=\"shippingMethod\" as |groups|}}\n  {{#each groups as |group|}}\n    <h3>{{group.key.shippingMethod}}</h3>\n    {{#sortBy group.items field=\"price\" order=\"asc\" as |sorted|}}\n      {{#each sorted as |p|}}\n        {{p.name}} — ${{numberFormat p.price \"0.00\"}}\n      {{/each}}\n    {{/sortBy}}\n  {{/each}}\n{{/groupBy}}"
+        }
+      }
+    }
+  },
+
+  "catalog_helpers": {
+
+    "catalogCollection": {
+      "name": "catalogCollection",
+      "status": "GA",
+      "description": "Fetches all items from a named Iterable Catalog Collection and provides them as an array for looping, indexing, or passing to groupBy/sortBy.",
+      "syntax": "{{#catalogCollection \"CollectionName\" as |items|}}...{{/catalogCollection}}",
+      "parameters": {
+        "collection_name": {
+          "type": "string",
+          "required": true,
+          "description": "Name of the catalog collection as defined in the Iterable UI. Case-sensitive."
+        }
+      },
+      "output": {
+        "type": "array",
+        "description": "Array of catalog item objects. Fields are flattened from dataFields to top level.",
+        "max_items": 50,
+        "max_items_note": "Iterable catalog collections are capped at 50 items."
+      },
+      "field_access": {
+        "rule": "All catalog item fields (including those backed by dataFields) are accessed directly at the top level of each item object.",
+        "correct": "{{item.brand}}, {{item.price}}, {{item.category}}",
+        "wrong": "{{item.dataFields.brand}} — dataFields wrapper is not present in Handlebars context"
+      },
+      "access_patterns": {
+        "loop_all": {
+          "description": "Loop through all items",
+          "code": "{{#catalogCollection \"FeaturedProducts\" as |items|}}\n  {{#each items as |product|}}\n    <h3>{{product.name}}</h3>\n    <p>${{numberFormat product.price \"0.00\"}}</p>\n  {{/each}}\n{{/catalogCollection}}"
+        },
+        "index_access": {
+          "description": "Access specific items by zero-based index",
+          "code": "{{#catalogCollection \"FeaturedProducts\" as |items|}}\n  <h1>{{items.[0].name}}</h1>\n  <h2>{{items.[1].name}}</h2>\n  <h2>{{items.[2].name}}</h2>\n{{/catalogCollection}}"
+        },
+        "with_groupby": {
+          "description": "Pass collection directly into groupBy",
+          "code": "{{#catalogCollection \"AllProducts\" as |items|}}\n  {{#groupBy items field=\"category\" as |groups|}}\n    {{#each groups as |group|}}\n      <h2>{{group.key.category}}</h2>\n      {{#each group.items as |p|}}{{p.name}}{{/each}}\n    {{/each}}\n  {{/groupBy}}\n{{/catalogCollection}}"
+        },
+        "with_sortby": {
+          "description": "Pass collection directly into sortBy",
+          "code": "{{#catalogCollection \"AllProducts\" as |items|}}\n  {{#sortBy items field=\"price\" order=\"asc\" as |sorted|}}\n    {{#each sorted as |p|}}{{p.name}} — ${{numberFormat p.price \"0.00\"}}{{/each}}\n  {{/sortBy}}\n{{/catalogCollection}}"
+        }
+      },
+      "catalog_setup_requirements": {
+        "field_mapping_order": "CRITICAL: Set ALL field type mappings BEFORE loading items. Field types set after ingestion do not apply retroactively.",
+        "sequence": [
+          "1. Create catalog",
+          "2. Set field mappings for all fields (name, url, price, imageUrl, description, categories, plus all custom fields)",
+          "3. Upload catalog items"
+        ],
+        "standard_fields": "Standard catalog fields (name, url, price, imageUrl, description, categories) must also be mapped explicitly — they are NOT automatically typed."
+      }
+    }
+  }
+}
