@@ -1,15 +1,25 @@
 {
-  "version": "1.0.0",
-  "last_updated": "2025-10-28",
+  "version": "1.1.0",
+  "last_updated": "2026-06-30",
   "description": "AI-optimized Iterable Handlebars reference structured for efficient lookups",
   "files": {
     "helpers": "schema/helpers.json",
+    "helpers_2026": "schema/helpers-2026.json",
     "contexts": "schema/contexts.json",
     "validation_rules": "schema/validation-rules.json",
     "common_patterns": "schema/common-patterns.json",
+    "patterns_2026": "schema/patterns-2026.json",
     "troubleshooting": "schema/troubleshooting.json",
+    "troubleshooting_2026": "schema/troubleshooting-2026.json",
     "universal_parameters": "schema/universal-parameters.json",
     "reserved_fields": "schema/reserved-fields.json"
+  },
+  "file_guidance": {
+    "start_here": "index.json — find the category and helper name",
+    "helper_details": "schema/helpers.json for established helpers; schema/helpers-2026.json for groupBy, sortBy, catalogCollection",
+    "patterns": "schema/common-patterns.json for established patterns; schema/patterns-2026.json for groupBy/sortBy/catalog composition patterns",
+    "debugging": "schema/troubleshooting.json for established issues; schema/troubleshooting-2026.json for groupBy/sortBy/catalog issues",
+    "skill_file": "SKILL.md — Cursor skill for AI agent self-discovery and quick reference"
   },
   "categories": {
     "conditional_logic": ["if", "unless", "and", "or", "not", "ifEq", "ifNotEq", "ifGt", "ifGte", "ifLt", "ifLte", "ifModEq", "ifMatchesRegexStr", "ifContainsStr"],
@@ -17,12 +27,19 @@
     "math": ["math", "add", "subtract", "multiply", "divide", "numberFormat", "eq", "gt", "gte", "lt", "lte"],
     "encoding_hashing": ["base64", "urlEncode", "hexEncode", "toJson", "toUrlEncodedJson", "md5", "sha1", "sha256", "hmacSHA1", "hmacSHA256"],
     "text": ["capitalize", "capitalizeFirst", "upper", "lower", "cut", "replace", "abbreviate", "center", "slugify", "breaklines", "substring", "length"],
-    "catalog": ["catalog"],
+    "catalog": ["catalog", "catalogCollection"],
     "data_feeds": ["data_feed_syntax", "merged_context"],
     "snippets": ["snippet"],
     "advanced": ["each", "lookup", "assign", "metadata"],
-    "arrays": ["maxInList", "minInList", "inLeftNotInRight", "join"],
+    "arrays": ["maxInList", "minInList", "inLeftNotInRight", "join", "groupBy", "sortBy"],
     "urls": ["smartOptInUrl", "unsubscribeByPhoneUrl", "hostedUnsubscribeUrl", "unsubscribeUrl", "unsubscribeMessageTypeUrl", "viewInBrowserUrl"]
+  },
+  "feature_flags": {
+    "HandlebarsArrayHelpers": {
+      "required_for": ["groupBy", "sortBy"],
+      "behavior_when_off": "Both helpers return empty string silently — no error, no output",
+      "how_to_enable": "Must be enabled per-project by an Iterable admin in platform settings"
+    }
   },
   "quick_reference": {
     "common_tasks": {
@@ -33,9 +50,13 @@
       "fallbacks": "Use {{defaultIfEmpty field \"default\"}}",
       "loops": "Use {{#each array}}...{{/each}}",
       "catalog_lookup": "Use {{#catalog \"name\" id as |item|}}...{{/catalog}}",
+      "catalog_collection": "Use {{#catalogCollection \"name\" as |items|}}{{#each items}}...{{/each}}{{/catalogCollection}}",
       "snippets": "Use {{{snippet \"name\" param=value}}}",
       "logic_snippets": "Use snippets with {{assign}} for drag-and-drop grids - extract data to numbered variables (product1Name, product2Name, etc.)",
-      "grid_layouts": "Call logic snippet at top: {{{snippet \"data-prep\"}}}, then reference variables in static grid cells"
+      "grid_layouts": "Call logic snippet at top: {{{snippet \"data-prep\"}}}, then reference variables in static grid cells",
+      "group_items": "Use {{#groupBy array field=\"fieldName\" as |groups|}}...{{/groupBy}} — requires HandlebarsArrayHelpers feature flag",
+      "sort_items": "Use {{#sortBy array field=\"fieldName\" order=\"asc\" as |sorted|}}...{{/sortBy}} — requires HandlebarsArrayHelpers feature flag",
+      "group_then_sort": "Wrap groupBy with sortBy to pre-sort input, or use sortBy inside {{#each groups}} for inner-group sorting"
     },
     "syntax_rules": {
       "double_braces": "{{field}} - Escapes HTML (safe for user input)",
@@ -44,8 +65,17 @@
       "data_feeds": "[[field]] - Data feed syntax (or {{field}} with merged context)",
       "snippets": "{{{snippet \"name\"}}} - Must use triple braces",
       "comments": "<!-- {{comment}} --> - HTML comment syntax",
-      "whitespace": "{{~tag~}} - Remove whitespace with tildes"
+      "whitespace": "{{~tag~}} - Remove whitespace with tildes",
+      "block_aliases": "{{#each arr as |item idx|}} - Named block params for scoped @index access inside nested loops"
+    },
+    "catalog_field_access": {
+      "rule": "Catalog item fields are accessed directly at top level — dataFields wrapper is not present in Handlebars context",
+      "correct": "{{product.brand}}, {{product.price}}",
+      "wrong": "{{product.dataFields.brand}}"
+    },
+    "catalog_setup_order": {
+      "rule": "Set ALL field type mappings BEFORE loading catalog items",
+      "sequence": ["Create catalog", "Set field mappings", "Upload items"]
     }
   }
 }
-
