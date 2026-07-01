@@ -1,0 +1,149 @@
+{
+  "_meta": {
+    "description": "New troubleshooting entries added in 2026 for groupBy, sortBy, and catalogCollection helpers. Supplement to schema/troubleshooting.json.",
+    "last_updated": "2026-06-30"
+  },
+
+  "array_helper_issues": {
+
+    "groupby_returns_nothing": {
+      "issue": "groupBy helper renders nothing / returns empty string silently",
+      "primary_cause": "HandlebarsArrayHelpers feature flag is disabled for this project",
+      "symptoms": [
+        "Template block renders as empty string",
+        "No error is thrown, no output at all",
+        "Works in one Iterable project but not another",
+        "Block content disappears when groupBy is added"
+      ],
+      "solution": "Enable the HandlebarsArrayHelpers feature flag for the project. This must be done by an Iterable admin in the platform settings. sortBy has the same requirement and the same silent failure mode.",
+      "secondary_causes": [
+        {
+          "cause": "Input array exceeds 100-item limit",
+          "symptom": "Some groups appear but items are truncated with no warning",
+          "solution": "Reduce the array to 100 items or fewer before passing to groupBy. Use a catalog collection (max 50 items) or filter the data upstream."
+        },
+        {
+          "cause": "Context passed is not an array",
+          "symptom": "Handlebars wraps a GroupByInvalidInputException as a HandlebarsException",
+          "solution": "Ensure the first argument to groupBy is a valid array. Check that the path resolves to an array in your event data or catalog."
+        },
+        {
+          "cause": "Missing field= hash option",
+          "symptom": "Template throws a GroupByMissingFieldException wrapped in HandlebarsException",
+          "solution": "Add field=\"fieldName\" to the helper call. field is required."
+        },
+        {
+          "cause": "Typo in collection name passed to catalogCollection",
+          "symptom": "catalogCollection returns empty, groupBy receives empty array, block renders nothing",
+          "solution": "Verify the collection name exactly matches the Iterable UI. Names are case-sensitive."
+        }
+      ]
+    },
+
+    "groupby_wrong_key_path": {
+      "issue": "groupBy key values are blank or groups don't match expected values",
+      "primary_cause": "Using only the leaf field name in the template instead of the full dot path from the field= parameter",
+      "explanation": "groupBy stores group keys using the FULL field path as nested maps. If field=\"LineItems.ItemShippingMethod\", the key is stored at group.key.LineItems.ItemShippingMethod — NOT at group.key.ItemShippingMethod.",
+      "symptoms": [
+        "{{group.key.fieldName}} renders blank even though data is present",
+        "Group keys appear correct in raw data but output is empty in template"
+      ],
+      "examples": {
+        "single_nested_field": {
+          "field_param": "field=\"LineItems.ItemShippingMethod\"",
+          "wrong": "{{group.key.ItemShippingMethod}}",
+          "correct": "{{group.key.LineItems.ItemShippingMethod}}"
+        },
+        "multi_field": {
+          "field_param": "field=\"billing.status,shipping.status\"",
+          "wrong": "{{group.key.status}}",
+          "correct_billing": "{{group.key.billing.status}}",
+          "correct_shipping": "{{group.key.shipping.status}}"
+        },
+        "simple_field": {
+          "field_param": "field=\"category\"",
+          "correct": "{{group.key.category}}",
+          "note": "For a top-level field, the key path matches the field name exactly."
+        }
+      },
+      "debugging_steps": [
+        "1. Look at your field= parameter",
+        "2. Mirror the exact path in your {{group.key.<path>}} expression",
+        "3. For field=\"a.b.c\", access as {{group.key.a.b.c}}",
+        "4. For field=\"x,y\", access as {{group.key.x}} and {{group.key.y}} separately"
+      ]
+    },
+
+    "sortby_returns_nothing": {
+      "issue": "sortBy helper renders nothing or returns empty string",
+      "primary_cause": "HandlebarsArrayHelpers feature flag is disabled (same flag as groupBy)",
+      "solution": "Enable HandlebarsArrayHelpers feature flag for the project. sortBy and groupBy share the same flag.",
+      "note": "sortBy was merged June 5, 2026 (PR #30792). If your environment was deployed before that date, the helper may not be available regardless of the feature flag state. Verify the platform version."
+    },
+
+    "at_index_wrong_in_nested_each": {
+      "issue": "@index or @last inside {{#each group.items}} shows wrong values",
+      "root_cause": "In Java Handlebars (jknack), @index, @first, and @last inside a nested {{#each}} block reflect the outer loop's iteration, not the inner one, when accessed without named block params.",
+      "symptoms": [
+        "@index is always the same value across all items in a group",
+        "@last triggers on wrong items",
+        "@first only shows correctly on the first group, not first item of each group"
+      ],
+      "wrong_code": "{{#each group.items}}\n  {{@index}}: {{name}}\n{{/each}}",
+      "correct_code": "{{#each group.items as |item iIdx|}}\n  {{iIdx}}: {{item.name}}\n{{/each}}",
+      "explanation": "Named block params (|item iIdx|) give you correctly scoped iteration metadata. iIdx is the zero-based index within the inner each loop."
+    },
+
+    "groupby_missing_items_after_100": {
+      "issue": "groupBy truncates items silently — not all items appear in output",
+      "cause": "groupBy has a 100-item hard limit. Arrays larger than 100 items are silently truncated at 100.",
+      "symptoms": [
+        "Some groups are missing that should appear",
+        "Item count in groups adds up to less than total items in the array",
+        "Works fine with small arrays, fails silently with large ones"
+      ],
+      "solution": "Reduce the input array to 100 or fewer items before passing to groupBy. Options: use a catalog collection (max 50 items), filter the data upstream in your event payload, or segment the data across multiple campaign sends.",
+      "note": "The 100-item limit is enforced in the merged PR (#30663). Original draft PR had a 500-item limit. The current production limit is 100."
+    },
+
+    "catalog_field_blank_after_groupby": {
+      "issue": "Catalog item fields render blank inside {{#each group.items}}",
+      "cause": "Attempting to access fields via dataFields wrapper instead of directly at top level",
+      "symptoms": [
+        "{{product.dataFields.brand}} renders blank",
+        "{{item.dataFields.category}} renders blank",
+        "Fields are confirmed present in catalog but empty in template"
+      ],
+      "solution": "Access catalog fields directly: {{product.brand}}, {{product.category}}. The dataFields wrapper is not present in the Handlebars context — catalog item fields are flattened to the top level of each item object.",
+      "correct": "{{product.brand}}, {{product.price}}, {{product.imageUrl}}",
+      "wrong": "{{product.dataFields.brand}}, {{product.dataFields.price}}"
+    },
+
+    "catalog_field_types_not_working": {
+      "issue": "Catalog fields behave as strings even though field type was set (e.g. price won't format as number)",
+      "cause": "Field type mappings were set AFTER catalog items were already loaded",
+      "explanation": "Iterable catalog field types must be configured BEFORE ingesting items. Setting types retroactively does not re-type already-loaded data.",
+      "solution": [
+        "1. Delete all items from the catalog (or recreate the catalog)",
+        "2. Set ALL field type mappings",
+        "3. Re-upload catalog items"
+      ],
+      "fields_to_map_explicitly": [
+        "name (string)",
+        "url (string)",
+        "price (double)",
+        "imageUrl (string)",
+        "description (string)",
+        "categories (string — map as the element type, not as array)",
+        "All custom fields at their correct types"
+      ],
+      "note": "Standard catalog fields (name, url, price, imageUrl, description, categories) are NOT automatically typed. They must be mapped explicitly."
+    },
+
+    "groupby_with_datafeed_vs_catalog": {
+      "issue": "groupBy works on event data but not on data feed or catalog data",
+      "cause": "Data feeds use [[field]] syntax and are merged at render time in a different context than groupBy expects. groupBy works on Handlebars-context arrays, not raw data feed arrays.",
+      "solution": "Use catalogCollection or pass event data arrays directly to groupBy. Data feeds are best used for static campaign-level data, not for arrays to be grouped dynamically."
+    }
+  }
+}
