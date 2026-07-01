@@ -1,0 +1,103 @@
+{
+  "_meta": {
+    "description": "New Iterable Handlebars patterns added in 2026. Supplement to schema/common-patterns.json.",
+    "last_updated": "2026-06-30",
+    "feature_flag_note": "All groupBy and sortBy patterns require the HandlebarsArrayHelpers feature flag to be enabled for the project."
+  },
+
+  "groupby_and_sorting": {
+
+    "groupby_with_catalog_display": {
+      "name": "groupBy with catalogCollection — Full Product Display",
+      "use_case": "Fetch catalog items and display them grouped by category with full product details (image, name, description, price)",
+      "code": "{{#catalogCollection \"AllRetailProducts\" as |items|}}\n  {{#groupBy items field=\"category\" as |groups|}}\n    {{#each groups as |group|}}\n      <h2>{{group.key.category}} ({{group.count}} items)</h2>\n      {{#each group.items as |product|}}\n        <div class=\"product-card\">\n          <img src=\"{{product.imageUrl}}\" alt=\"{{product.name}}\" width=\"200\">\n          <h3>{{product.name}}</h3>\n          <p>{{product.description}}</p>\n          {{#if product.onSale}}\n            <s>${{numberFormat product.price \"0.00\"}}</s>\n            <strong>${{numberFormat product.salePrice \"0.00\"}}</strong>\n          {{else}}\n            <p>${{numberFormat product.price \"0.00\"}}</p>\n          {{/if}}\n          <a href=\"{{product.url}}\">Shop Now</a>\n        </div>\n      {{/each}}\n    {{/each}}\n  {{/groupBy}}\n{{/catalogCollection}}",
+      "requirements": [
+        "HandlebarsArrayHelpers feature flag must be enabled for this project",
+        "catalogCollection max 50 items (Iterable platform limit)",
+        "Set ALL catalog field mappings BEFORE loading items",
+        "dataFields fields are accessed directly: product.category, not product.dataFields.category"
+      ]
+    },
+
+    "sortby_price_ascending": {
+      "name": "sortBy — Sort Catalog Items by Price",
+      "use_case": "Fetch catalog items and display sorted by price ascending (lowest first)",
+      "code": "{{#catalogCollection \"AllRetailProducts\" as |items|}}\n  {{#sortBy items field=\"price\" order=\"asc\" as |sorted|}}\n    {{#each sorted as |product|}}\n      <div class=\"product-row\">\n        {{product.name}} — ${{numberFormat product.price \"0.00\"}}\n      </div>\n    {{/each}}\n  {{/sortBy}}\n{{/catalogCollection}}",
+      "notes": [
+        "sortBy GA June 5 2026 — requires HandlebarsArrayHelpers feature flag",
+        "Type (number/string/date) auto-detected from first non-null value — no type param needed",
+        "Nulls always sort last regardless of asc/desc"
+      ]
+    },
+
+    "sort_then_group": {
+      "name": "sortBy → groupBy — Control Group Insertion Order",
+      "use_case": "Pre-sort array so that groups appear in desired order. groupBy preserves first-seen key order, so sorting first controls group sequence.",
+      "why": "groupBy preserves insertion order of the first time a key is encountered. If you want groups sorted (e.g. chronologically by date), sort the input array first.",
+      "code": "{{#sortBy items field=\"estimatedDeliveryDate\" order=\"asc\" as |sorted|}}\n  {{#groupBy sorted field=\"estimatedDeliveryDate\" as |groups|}}\n    {{#each groups as |group|}}\n      <h3>Arriving {{group.key.estimatedDeliveryDate}} ({{group.count}} items)</h3>\n      {{#each group.items as |item|}}\n        <p>{{item.name}}</p>\n      {{/each}}\n    {{/each}}\n  {{/groupBy}}\n{{/sortBy}}"
+    },
+
+    "group_then_sort_within": {
+      "name": "groupBy → sortBy within each group",
+      "use_case": "Group items by shipping method, then sort items within each group by price ascending",
+      "code": "{{#catalogCollection \"AllRetailProducts\" as |items|}}\n  {{#groupBy items field=\"shippingMethod\" as |groups|}}\n    {{#each groups as |group|}}\n      <h3>{{group.key.shippingMethod}} ({{group.count}} items)</h3>\n      {{#sortBy group.items field=\"price\" order=\"asc\" as |sorted|}}\n        {{#each sorted as |product|}}\n          {{product.name}} — ${{numberFormat product.price \"0.00\"}}\n        {{/each}}\n      {{/sortBy}}\n    {{/each}}\n  {{/groupBy}}\n{{/catalogCollection}}"
+    },
+
+    "sort_group_sort_composition": {
+      "name": "Full sortBy → groupBy → sortBy Composition",
+      "use_case": "Pre-sort by date for group order, group by method+date, inner-sort by price desc within each group",
+      "code": "{{#sortBy items field=\"estimatedDeliveryDate\" order=\"asc\" as |sorted|}}\n  {{#groupBy sorted field=\"shippingMethod,estimatedDeliveryDate\" as |groups|}}\n    {{#each groups as |group|}}\n      <h3>{{group.key.shippingMethod}} — {{group.key.estimatedDeliveryDate}}</h3>\n      {{#sortBy group.items field=\"price\" order=\"desc\" as |highToLow|}}\n        {{#each highToLow as |item|}}\n          {{item.name}} — ${{numberFormat item.price \"0.00\"}}\n        {{/each}}\n      {{/sortBy}}\n    {{/each}}\n  {{/groupBy}}\n{{/sortBy}}"
+    },
+
+    "rei_order_confirmation": {
+      "name": "REI-Style Order Confirmation — Deep Nested Event Data",
+      "use_case": "Display order line items from nested event payload. Group by shipping method + promised delivery date, sorted chronologically. Inner-sort by price descending.",
+      "data_shape": {
+        "event_data_path": "xmldata.ShipTos.ShipTo",
+        "each_item_has": [
+          "LineItems.ItemShippingMethod",
+          "LineItems.ItemFirstPromisedDate",
+          "LineItems.ItemName",
+          "LineItems.ItemQuantity",
+          "LineItems.ItemPrice"
+        ]
+      },
+      "code": "{{#sortBy xmldata.ShipTos.ShipTo field=\"LineItems.ItemFirstPromisedDate\" order=\"asc\" as |sorted|}}\n{{#groupBy sorted field=\"LineItems.ItemShippingMethod,LineItems.ItemFirstPromisedDate\" as |groups|}}\n{{#each groups as |group|}}\n  <div class=\"shipment-group\">\n    <h3>\n      {{group.key.LineItems.ItemShippingMethod}}\n      — Arriving {{dateFormat group.key.LineItems.ItemFirstPromisedDate \"MMM dd, yyyy\"}}\n      ({{group.count}} item{{#ifGt group.count 1}}s{{/ifGt}})\n    </h3>\n    {{#sortBy group.items field=\"LineItems.ItemPrice\" order=\"desc\" as |sortedItems|}}\n    {{#each sortedItems as |item|}}\n      <div class=\"line-item\">\n        <span>{{item.LineItems.ItemName}}</span>\n        <span>Qty: {{item.LineItems.ItemQuantity}}</span>\n        <span>${{numberFormat item.LineItems.ItemPrice \"0.00\"}}</span>\n      </div>\n    {{/each}}\n    {{/sortBy}}\n  </div>\n{{/each}}\n{{/groupBy}}\n{{/sortBy}}",
+      "key_notes": [
+        "Pre-sorting by ItemFirstPromisedDate forces shipment groups into chronological order",
+        "Key paths use FULL dot notation: group.key.LineItems.ItemShippingMethod (not group.key.ItemShippingMethod)",
+        "Multi-field group key: field=\"a,b\" creates composite key accessed as group.key.a and group.key.b",
+        "Inner sort puts highest-value item at top of each shipment group"
+      ]
+    },
+
+    "named_block_params_at_index_fix": {
+      "name": "@index / @last inside groupBy Items — Named Block Params Workaround",
+      "problem": "@index, @first, @last inside {{#each group.items}} reflect the outer groups loop index, not the inner items loop. This is a Java Handlebars scoping behavior.",
+      "wrong_code": "{{#each group.items}}\n  {{@index}}: {{name}} {{#if @last}}(last item){{/if}}\n{{/each}}",
+      "why_wrong": "@index and @last here reflect the position in the groups array, not the position within group.items",
+      "correct_code": "{{#each group.items as |item iIdx|}}\n  {{iIdx}}: {{item.name}}\n{{/each}}",
+      "explanation": "Using named block params (item iIdx) gives you a correctly-scoped index for the inner each loop.",
+      "also_applies_to": "Any nested {{#each}} inside a block helper. Named block params always give the correct scoped index."
+    },
+
+    "empty_state_handling": {
+      "name": "groupBy Empty State Handling",
+      "use_case": "Handle the case where the input array is empty or groupBy produces no groups",
+      "code": "{{#groupBy items field=\"category\" as |groups|}}\n  {{#if groups}}\n    {{#each groups as |group|}}\n      <h2>{{group.key.category}}</h2>\n      {{#each group.items as |item|}}{{item.name}}{{/each}}\n    {{/each}}\n  {{else}}\n    <p>No products available.</p>\n  {{/if}}\n{{/groupBy}}",
+      "note": "When the input array is empty, groupBy renders the block with an empty groups array. Use {{#if groups}} to detect and handle the empty state."
+    },
+
+    "multi_field_sort_tiebreaker": {
+      "name": "sortBy Multi-Field Tiebreaker Sort",
+      "use_case": "Sort by primary field, use secondary field to break ties",
+      "code": "{{#sortBy products field=\"priority,name\" order=\"desc\" as |sorted|}}\n  {{#each sorted as |p|}}\n    {{p.priority}}: {{p.name}}\n  {{/each}}\n{{/sortBy}}",
+      "notes": [
+        "First field (priority) is primary sort key",
+        "Second field (name) breaks ties when priority values are equal",
+        "Both fields use the same order= direction",
+        "For mixed directions, chain two sortBy calls (inner sort first, outer sort second)"
+      ]
+    }
+  }
+}
